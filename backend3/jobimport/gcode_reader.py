@@ -1,6 +1,4 @@
-
 __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
-
 
 import math
 import sys
@@ -151,8 +149,7 @@ class GcodeReader:
         self.re_toolinfo = re.compile('\((T[0-9]+) *(.+) *\)').findall
 
         # output job
-        self.job = {'head':{'kind':'mill'}, 'defs':[]}
-
+        self.job = {'head': {'kind': 'mill'}, 'defs': []}
 
     def finalize_pass(self):
         if self.def_:
@@ -161,16 +158,14 @@ class GcodeReader:
             self.def_['mists'] = self.mists
             self.def_['floods'] = self.floods
 
-
     def next_pass(self):
         self.rates = []
         self.freqs = []
         self.mists = False
         self.floods = False
-        self.job['defs'].append({'data':[], 'tool':'', 'toolinfo':''})
+        self.job['defs'].append({'data': [], 'tool': '', 'toolinfo': ''})
         self.def_ = self.job['defs'][-1]
         self.path = self.def_['data']
-
 
     def on_toolchange(self, line):
         """Handle a tool change action (M6).
@@ -190,18 +185,16 @@ class GcodeReader:
             self.next_pass()
             self.bTool = True
             # add tool, toolinfo to def
-            tool = 'T'+str(self.T_num)
+            tool = 'T' + str(self.T_num)
             self.def_['tool'] = tool
             if tool in self.toolinfo:
                 self.def_['toolinfo'] = self.toolinfo[tool]
-
 
     def on_action(self, action):
         if not self.bTool:
             print(("ERROR: no tool defined at: %s:%s" % action))
             return
         self.path.append(action)
-
 
     def parse(self, gcodestring):
         """Convert gcode to a job file."""
@@ -252,7 +245,7 @@ class GcodeReader:
                 elif code[0] == 'T':
                     self.T_num = code[1]
                 # spindle frequency change
-                elif code[0] == 'M' and code[1] in (3,5):
+                elif code[0] == 'M' and code[1] in (3, 5):
                     if code[1] == 3:
                         self.S_on = True
                         bSpindle = True
@@ -260,7 +253,7 @@ class GcodeReader:
                         self.S_on = False
                         bSpindle = True
                 # coolant valve change
-                elif code[0] == 'M' and code[1] in (7,8,9):
+                elif code[0] == 'M' and code[1] in (7, 8, 9):
                     if code[1] == 7:
                         if not self.M_mist:
                             self.M_mist = True
@@ -277,24 +270,24 @@ class GcodeReader:
                             self.M_flood = False
                             bFlood = True
                 # motion style change
-                elif code[0] == 'G' and code[1] in (0,1):
-                    self.G_motion = 'G'+str(code[1])
+                elif code[0] == 'G' and code[1] in (0, 1):
+                    self.G_motion = 'G' + str(code[1])
                 # handle reporting of unsupported gcode
-                elif code[0] == 'G' and code[1] in (2,3):
+                elif code[0] == 'G' and code[1] in (2, 3):
                     print("ERROR: G2,G3 arc motions not supported")
                 elif code[0] == 'G' and code[1] in (4,):
                     print("ERROR: G4 dwell motions not supported")
                 elif code[0] == 'G' and code[1] in (53,):
                     print("ERROR: G53 machine CS motion not supported")
-                elif code[0] == 'G' and code[1] in (55,56,57,58,59):
+                elif code[0] == 'G' and code[1] in (55, 56, 57, 58, 59):
                     print("ERROR: G55-G59 CS not supported")
                 elif code[0] == 'G' and code[1] in (91,):
                     print("ERROR: G91 relative motion not supported")
                 elif code[0] == 'G' and code[1] in (92,):
                     print("ERROR: G92 shift CS not supported")
-                elif code[0] == 'G' and code[1] in (93,95):
+                elif code[0] == 'G' and code[1] in (93, 95):
                     print("ERROR: G93,G95 alternative distance modes not supported")
-                elif code[0] == 'M' and code[1] in (0,1):
+                elif code[0] == 'M' and code[1] in (0, 1):
                     print("ERROR: M0,M1 pause not supported")
                 elif code[0] == 'M' and code[1] in (4,):
                     print("ERROR: M4 reverse spindle not supported")
@@ -304,25 +297,25 @@ class GcodeReader:
             ### commit actions in right order
             # commit coolant
             if bMist:
-                self.on_action(('MIST',self.M_mist))
+                self.on_action(('MIST', self.M_mist))
                 self.mists = True
             if bFlood:
-                self.on_action(('FLOOD',self.M_flood))
+                self.on_action(('FLOOD', self.M_flood))
                 self.floods = True
             # commit spindle
             if bSpindle:
                 if self.S_on:
-                    self.on_action(('S',self.S_freq))
+                    self.on_action(('S', self.S_freq))
                     self.freqs.append(self.S_freq)
                 else:
-                    self.on_action(('S',0))
+                    self.on_action(('S', 0))
             # commit feedrate
             if bFeed:
-                self.on_action(('F',self.F_rate))
+                self.on_action(('F', self.F_rate))
                 self.rates.append(self.F_rate)
             # commit motion
             if bMotion:
-                self.on_action((self.G_motion,(self.X_pos, self.Y_pos, self.Z_pos)))
+                self.on_action((self.G_motion, (self.X_pos, self.Y_pos, self.Z_pos)))
 
         self.finalize_pass()
         return self.job

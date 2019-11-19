@@ -15,7 +15,6 @@ from collections import namedtuple
 from itertools import chain, islice
 from . import tostr
 
-
 DXFTag = namedtuple('DXFTag', 'code value')
 NONE_TAG = DXFTag(999999, 'NONE')
 APP_DATA_MARKER = 102
@@ -31,7 +30,7 @@ def point_tuple(value):
     return tuple(float(f) for f in value)
 
 
-POINT_CODES = frozenset(chain(list(range(10, 20)), (210, ), list(range(110, 113)), list(range(1010, 1020))))
+POINT_CODES = frozenset(chain(list(range(10, 20)), (210,), list(range(110, 113)), list(range(1010, 1020))))
 
 
 def is_point_tag(tag):
@@ -71,6 +70,7 @@ class TagCaster:
             else:
                 raise
 
+
 TYPES = [
     (tostr, list(range(0, 10))),
     (point_tuple, list(range(10, 20))),
@@ -109,6 +109,7 @@ cast_tag_value = _TagCaster.cast_value
 def stream_tagger(stream, assure_3d_coords=False):
     """ Generates DXFTag() from a stream (untrusted external source). Does not skip comment tags 999.
     """
+
     class Counter:
         def __init__(self):
             self.counter = 0
@@ -171,6 +172,7 @@ def string_tagger(s):
 
 class Tags(list):
     """ DXFTag() chunk as flat list. """
+
     def find_all(self, code):
         """ Returns a list of DXFTag(code, ...). """
         return [tag for tag in self if tag.code == code]
@@ -265,6 +267,7 @@ class TagGroups(list):
     A SplitTag is a tag with code == splitcode, like (0, 'SECTION') for splitcode=0.
 
     """
+
     def __init__(self, tags, split_code=0):
         super(TagGroups, self).__init__()
         self._build_groups(tags, split_code)
@@ -272,6 +275,7 @@ class TagGroups(list):
     def _build_groups(self, tags, splitcode):
         def append(tag):  # first do nothing, skip tags in front of the first split tag
             pass
+
         group = None
         for tag in tags:  # has to work with iterators/generators
             if tag.code == splitcode:
@@ -447,5 +451,5 @@ def binary_encoded_data_to_bytes(data):
     PY3 = sys.version_info[0] >= 3
     byte_array = array('B' if PY3 else b'B')
     for text in data:
-        byte_array.extend(int(text[index:index+2], 16) for index in range(0, len(text), 2))
+        byte_array.extend(int(text[index:index + 2], 16) for index in range(0, len(text), 2))
     return byte_array.tobytes() if PY3 else byte_array.tostring()

@@ -1,4 +1,3 @@
-
 import json
 
 from config import conf
@@ -7,9 +6,7 @@ from .dxf_parser import DXFParser
 from .gcode_reader import GcodeReader
 from . import pathoptimizer
 
-
 __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
-
 
 
 def convert(job, optimize=True, tolerance=conf['tolerance']):
@@ -56,24 +53,24 @@ def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
 
     # create an dba job from res
     # TODO: reader should generate an dba job to begin with
-    job = {'head':{}, 'passes':[], 'items':[], 'defs':[]}
+    job = {'head': {}, 'passes': [], 'items': [], 'defs': []}
     if 'rasters' in res:
         for raster in res['rasters']:
-            job['defs'].append({"kind":"image",
-                                "data":raster['data'] ,
-                                "pos":raster['pos'] ,
+            job['defs'].append({"kind": "image",
+                                "data": raster['data'],
+                                "pos": raster['pos'],
                                 "size": raster['size']})
-            job['items'].append({"def":len(job['defs'])-1})
+            job['items'].append({"def": len(job['defs']) - 1})
 
     if 'boundarys' in res:
         if 'dpi' in res:
             job['head']['dpi'] = res['dpi']
-        for color,path in res['boundarys'].items():
+        for color, path in res['boundarys'].items():
             if optimize:
                 pathoptimizer.optimize(path, tolerance)
-            job['defs'].append({"kind":"path",
-                                "data":path})
-            job['items'].append({"def":len(job['defs'])-1, "color":color})
+            job['defs'].append({"kind": "path",
+                                "data": path})
+            job['items'].append({"def": len(job['defs']) - 1, "color": color})
         if optimize:
             job['head']['optimized'] = tolerance
 
@@ -119,6 +116,7 @@ def read_svg(svg_string, workspace, tolerance, forced_dpi=None, optimize=True):
     #                 })
     return job
 
+
 def read_dxf(dxf_string, tolerance, optimize=True):
     """Read a dxf file string and optimize returned value."""
     dxfParser = DXFParser(tolerance)
@@ -130,6 +128,7 @@ def read_dxf(dxf_string, tolerance, optimize=True):
             pathoptimizer.dxf_optimize(vec['paths'], tolerance)
             vec['optimized'] = tolerance
     return job
+
 
 def read_gcode(gcode_string, tolerance, optimize=False):
     """Read a gcode file string and convert to dba job."""
@@ -154,9 +153,9 @@ def get_type(job):
         elif 'SECTION' in jobheader and 'HEADER' in jobheader:
             type_ = 'dxf'
         elif 'G0' in jobheader or 'G1' in jobheader or \
-             'G00' in jobheader or 'G01' in jobheader or \
-             'g0' in jobheader or 'g1' in jobheader or \
-             'g00' in jobheader or 'g01' in jobheader:
+                'G00' in jobheader or 'G01' in jobheader or \
+                'g0' in jobheader or 'g1' in jobheader or \
+                'g00' in jobheader or 'g01' in jobheader:
             type_ = 'gcode'
         else:
             print("ERROR: Cannot figure out file type 1.")

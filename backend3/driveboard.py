@@ -18,10 +18,7 @@ if not conf['mill_mode']:
     except ImportError:
         print("Pillow module missing, raster mode will fail.")
 
-
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
-
-
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 ################ SENDING PROTOCOL
 CMD_STOP = chr(1)
@@ -82,8 +79,8 @@ ERROR_LIMIT_HIT_Z2 = '-'
 ERROR_INVALID_MARKER = '#'
 ERROR_INVALID_DATA = ':'
 ERROR_INVALID_COMMAND = '<'
-ERROR_INVALID_PARAMETER ='>'
-ERROR_TRANSMISSION_ERROR ='='
+ERROR_INVALID_PARAMETER = '>'
+ERROR_TRANSMISSION_ERROR = '='
 
 # status: info flags
 INFO_IDLE_YES = 'A'
@@ -111,7 +108,6 @@ INFO_INTENSITY = 'h'
 INFO_DURATION = 'i'
 INFO_PIXEL_WIDTH = 'j'
 ################
-
 
 
 # reverse lookup for commands, for debugging
@@ -202,11 +198,9 @@ markers_rx = {
     'j': "INFO_PIXEL_WIDTH",
 }
 
-
-
-
 SerialLoop = None
 fallback_msg_thread = None
+
 
 class SerialLoopClass(threading.Thread):
 
@@ -228,14 +222,14 @@ class SerialLoopClass(threading.Thread):
         self.job_size = 0
 
         # status flags
-        self._status = {}    # last complete status frame
-        self._s = {}         # status fram currently assembling
+        self._status = {}  # last complete status frame
+        self._s = {}  # status fram currently assembling
         self.reset_status()
         self._paused = False
 
         self.request_stop = False
         self.request_resume = False
-        self.request_status = 2       # 0: no request, 1: normal request, 2: super request
+        self.request_status = 2  # 0: no request, 1: normal request, 2: super request
 
         self.pdata_count = 0
         self.pdata_chars = [None, None, None, None]
@@ -249,18 +243,16 @@ class SerialLoopClass(threading.Thread):
         # see: http://effbot.org/zone/thread-synchronization.htm
         self.lock = threading.Lock()
 
-
-
     def reset_status(self):
         self._status = {
-            'ready': False,                 # is hardware idle (and not stop mode)
-            'serial': False,                # is serial connected
-            'appver':conf['version'],
+            'ready': False,  # is hardware idle (and not stop mode)
+            'serial': False,  # is serial connected
+            'appver': conf['version'],
             'firmver': None,
             'paused': False,
-            'pos':[0.0, 0.0, 0.0],
-            'underruns': 0,                 # how many times machine is waiting for serial data
-            'stackclear': 999999,           # minimal stack clearance (must stay above 0)
+            'pos': [0.0, 0.0, 0.0],
+            'underruns': 0,  # how many times machine is waiting for serial data
+            'stackclear': 999999,  # minimal stack clearance (must stay above 0)
             'progress': 1.0,
 
             ### stop conditions
@@ -270,7 +262,7 @@ class SerialLoopClass(threading.Thread):
             # x1, x2, y1, y2, z1, z2,
             # requested, buffer, marker, data, command, parameter, transmission
 
-            'info':{},
+            'info': {},
             # possible keys: door, chiller
 
             ### super
@@ -283,20 +275,18 @@ class SerialLoopClass(threading.Thread):
         }
         self._s = copy.deepcopy(self._status)
 
-
     def send_command(self, command):
         self.tx_buffer.append(command)
         self.job_size += 1
 
-
     def send_param(self, param, val):
         # num to be [-134217.728, 134217.727], [-2**27, 2**27-1]
         # three decimals are retained
-        num = int(round(((val+134217.728)*1000)))
-        char0 = chr((num&127)+128)
-        char1 = chr(((num&(127<<7))>>7)+128)
-        char2 = chr(((num&(127<<14))>>14)+128)
-        char3 = chr(((num&(127<<21))>>21)+128)
+        num = int(round(((val + 134217.728) * 1000)))
+        char0 = chr((num & 127) + 128)
+        char1 = chr(((num & (127 << 7)) >> 7) + 128)
+        char2 = chr(((num & (127 << 14)) >> 14) + 128)
+        char3 = chr(((num & (127 << 21)) >> 21) + 128)
         self.tx_buffer.append(char0)
         self.tx_buffer.append(char1)
         self.tx_buffer.append(char2)
@@ -304,19 +294,17 @@ class SerialLoopClass(threading.Thread):
         self.tx_buffer.append(param)
         self.job_size += 5
 
-
     def send_data(self, data, start, end):
         count = 2
         with self.lock:
             self.tx_buffer.append(CMD_RASTER_DATA_START)
         for val in itertools.islice(data, start, end):
             with self.lock:
-                self.tx_buffer.append(chr(int(0.5*(255-val))+128))
+                self.tx_buffer.append(chr(int(0.5 * (255 - val)) + 128))
             count += 1
         with self.lock:
             self.tx_buffer.append(CMD_RASTER_DATA_END)
             self.job_size += count
-
 
     def run(self):
         """Main loop of the serial thread."""
@@ -345,14 +333,14 @@ class SerialLoopClass(threading.Thread):
                         print("ERROR: serial got disconnected 2.")
                         self.stop_processing = True
                         self._status['serial'] = False
-                        self._status['ready']  = False
+                        self._status['ready'] = False
                 else:
                     print("ERROR: serial got disconnected 3.")
                     self.stop_processing = True
                     self._status['serial'] = False
-                    self._status['ready']  = False
+                    self._status['ready'] = False
                 # status request
-                if time.time()-last_status_request > 0.5:
+                if time.time() - last_status_request > 0.5:
                     if self._status['ready']:
                         self.request_status = 2  # ready -> super request
                     else:
@@ -361,8 +349,6 @@ class SerialLoopClass(threading.Thread):
                 # flush stdout, so print shows up timely
                 sys.stdout.flush()
             time.sleep(0.004)
-
-
 
     def _serial_read(self):
         for char in self.device.read(self.RX_CHUNK_SIZE):
@@ -381,7 +367,7 @@ class SerialLoopClass(threading.Thread):
                         self._status['progress'] = 1.0
                     else:
                         self._status['progress'] = \
-                          round(self.tx_pos/float(self.job_size),3)
+                            round(self.tx_pos / float(self.job_size), 3)
                     self._s['stops'].clear()
                     self._s['info'].clear()
                     self._s['ready'] = False
@@ -433,13 +419,13 @@ class SerialLoopClass(threading.Thread):
                     print("ERROR: invalid stop error marker")
                 # in stop mode, print recent transmission, unless stop request, or limit
                 if char != ERROR_SERIAL_STOP_REQUEST and \
-                          char != ERROR_LIMIT_HIT_X1 and \
-                          char != ERROR_LIMIT_HIT_X2 and \
-                          char != ERROR_LIMIT_HIT_Y1 and \
-                          char != ERROR_LIMIT_HIT_Y2 and \
-                          char != ERROR_LIMIT_HIT_Z1 and \
-                          char != ERROR_LIMIT_HIT_Z2:
-                    recent_chars = self.tx_buffer[max(0,self.tx_pos-128):self.tx_pos]
+                        char != ERROR_LIMIT_HIT_X1 and \
+                        char != ERROR_LIMIT_HIT_X2 and \
+                        char != ERROR_LIMIT_HIT_Y1 and \
+                        char != ERROR_LIMIT_HIT_Y2 and \
+                        char != ERROR_LIMIT_HIT_Z1 and \
+                        char != ERROR_LIMIT_HIT_Z2:
+                    recent_chars = self.tx_buffer[max(0, self.tx_pos - 128):self.tx_pos]
                     print("RECENT TX BUFFER:")
                     for char in recent_chars:
                         if char in markers_tx:
@@ -456,7 +442,7 @@ class SerialLoopClass(threading.Thread):
                 self._paused = False
                 self.device.flushOutput()
                 self.pdata_count = 0
-                self._s['ready'] = True # ready but in stop mode
+                self._s['ready'] = True  # ready but in stop mode
             elif 64 < ord(char) < 91:  # info flags
                 # chr is in [A-Z], info flag
                 if char == INFO_IDLE_YES:
@@ -468,14 +454,14 @@ class SerialLoopClass(threading.Thread):
                     self._s['info']['chiller'] = True
                 else:
                     print("ERROR: invalid info flag")
-                    sys.stdout.write('('+char+','+str(ord(char))+')')
+                    sys.stdout.write('(' + char + ',' + str(ord(char)) + ')')
                 self.pdata_count = 0
             elif 96 < ord(char) < 123:  # parameter
                 # char is in [a-z], process parameter
-                num = ((((ord(self.pdata_chars[3])-128)*2097152
-                       + (ord(self.pdata_chars[2])-128)*16384
-                       + (ord(self.pdata_chars[1])-128)*128
-                       + (ord(self.pdata_chars[0])-128) )- 134217728)/1000.0)
+                num = ((((ord(self.pdata_chars[3]) - 128) * 2097152
+                         + (ord(self.pdata_chars[2]) - 128) * 16384
+                         + (ord(self.pdata_chars[1]) - 128) * 128
+                         + (ord(self.pdata_chars[0]) - 128)) - 134217728) / 1000.0)
                 if char == INFO_POS_X:
                     self._s['pos'][0] = num
                 elif char == INFO_POS_Y:
@@ -483,7 +469,7 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_POS_Z:
                     self._s['pos'][2] = num
                 elif char == INFO_VERSION:
-                    num = str(int(num)/100.0)
+                    num = str(int(num) / 100.0)
                     self._s['firmver'] = num
                 elif char == INFO_BUFFER_UNDERRUN:
                     self._s['underruns'] = num
@@ -497,7 +483,7 @@ class SerialLoopClass(threading.Thread):
                 elif char == INFO_FEEDRATE:
                     self._s['feedrate'] = num
                 elif char == INFO_INTENSITY:
-                    self._s['intensity'] = 100*num/255
+                    self._s['intensity'] = 100 * num / 255
                 elif char == INFO_DURATION:
                     self._s['duration'] = num
                 elif char == INFO_PIXEL_WIDTH:
@@ -519,9 +505,6 @@ class SerialLoopClass(threading.Thread):
                 print(char)
                 print("ERROR: invalid marker")
                 self.pdata_count = 0
-
-
-
 
     def _serial_write(self):
         ### sending super commands (handled in serial rx interrupt)
@@ -548,7 +531,7 @@ class SerialLoopClass(threading.Thread):
                 if (self.FIRMBUF_SIZE - self.firmbuf_used) > self.TX_CHUNK_SIZE:
                     try:
                         # to_send = ''.join(islice(self.tx_buffer, 0, self.TX_CHUNK_SIZE))
-                        to_send = self.tx_buffer[self.tx_pos:self.tx_pos+self.TX_CHUNK_SIZE]
+                        to_send = self.tx_buffer[self.tx_pos:self.tx_pos + self.TX_CHUNK_SIZE]
                         expectedSent = len(to_send)
                         # by protocol duplicate every char
                         to_send_double = []
@@ -559,7 +542,7 @@ class SerialLoopClass(threading.Thread):
                         #
                         t_prewrite = time.time()
                         actuallySent = self.device.write(to_send)
-                        if actuallySent != expectedSent*2:
+                        if actuallySent != expectedSent * 2:
                             print("ERROR: write did not complete")
                             assumedSent = 0
                         else:
@@ -579,23 +562,17 @@ class SerialLoopClass(threading.Thread):
                 self.tx_buffer = []
                 self.tx_pos = 0
 
-
-
-
     def _send_char(self, char):
         try:
             t_prewrite = time.time()
             # self.device.write(char)
             # print "send_char: [%s,%s]" % (str(ord(char)),str(ord(char)))
-            self.device.write(char+char)  # by protocol send twice
+            self.device.write(char + char)  # by protocol send twice
             if time.time() - t_prewrite > 0.1:
                 pass
                 # print "WARN: write delay 2"
         except serial.SerialTimeoutException:
             print("ERROR: writeTimeoutError 1")
-
-
-
 
 
 ###########################################################################
@@ -748,7 +725,7 @@ def connect_withfind(port=conf['serial_port'], baudrate=conf['baudrate'], verbos
             if verbose:
                 print("INFO: Connected at %s." % serialfindresult)
             conf['serial_port'] = serialfindresult
-            write_config_fields({'serial_port':serialfindresult})
+            write_config_fields({'serial_port': serialfindresult})
         else:
             if verbose:
                 print("-----------------------------------------------------------------------------")
@@ -778,7 +755,6 @@ def close():
         ret = False
     SerialLoop = None
     return ret
-
 
 
 def flash(serial_port=conf['serial_port'], firmware=conf['firmware']):
@@ -823,7 +799,7 @@ def status():
             stats['serial'] = connected()  # make sure serial flag is up-to-date
         return stats
     else:
-        return {'serial':False, 'ready':False}
+        return {'serial': False, 'ready': False}
 
 
 def homing():
@@ -842,31 +818,37 @@ def feedrate(val):
     with SerialLoop.lock:
         SerialLoop.send_param(PARAM_FEEDRATE, val)
 
+
 def intensity(val):
     global SerialLoop
     with SerialLoop.lock:
-        val = max(min(255*val/100, 255), 0)
+        val = max(min(255 * val / 100, 255), 0)
         SerialLoop.send_param(PARAM_INTENSITY, val)
+
 
 def duration(val):
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_param(PARAM_DURATION, val)
 
+
 def pixelwidth(val):
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_param(PARAM_PIXEL_WIDTH, val)
+
 
 def relative():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_RELATIVE)
 
+
 def absolute():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_REF_ABSOLUTE)
+
 
 def move(x=None, y=None, z=None):
     global SerialLoop
@@ -878,6 +860,7 @@ def move(x=None, y=None, z=None):
         if z is not None:
             SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_LINE)
+
 
 def supermove(x=None, y=None, z=None):
     """Moves in machine coordinates bypassing any offsets."""
@@ -904,6 +887,7 @@ def supermove(x=None, y=None, z=None):
         SerialLoop.send_command(CMD_OFFSET_RESTORE)
         SerialLoop.send_command(CMD_LINE)
 
+
 def rastermove(x, y, z=0.0):
     global SerialLoop
     with SerialLoop.lock:
@@ -912,16 +896,19 @@ def rastermove(x, y, z=0.0):
         SerialLoop.send_param(PARAM_TARGET_Z, z)
         SerialLoop.send_command(CMD_RASTER)
 
+
 def rasterdata(data, start, end):
     # NOTE: no SerialLoop.lock
     # more granular locking in send_data
     SerialLoop.send_data(data, start, end)
+
 
 def pause():
     global SerialLoop
     with SerialLoop.lock:
         if SerialLoop.tx_buffer:
             SerialLoop._paused = True
+
 
 def unpause():
     global SerialLoop
@@ -951,15 +938,18 @@ def air_on():
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AIR_ENABLE)
 
+
 def air_off():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AIR_DISABLE)
 
+
 def aux_on():
     global SerialLoop
     with SerialLoop.lock:
         SerialLoop.send_command(CMD_AUX_ENABLE)
+
 
 def aux_off():
     global SerialLoop
@@ -981,6 +971,7 @@ def offset(x=None, y=None, z=None):
             SerialLoop.send_param(PARAM_OFFSET_Z, z)
         SerialLoop.send_command(CMD_REF_RESTORE)
 
+
 def absoffset(x=None, y=None, z=None):
     """Sets an offset in machine coordinates."""
     global SerialLoop
@@ -994,7 +985,6 @@ def absoffset(x=None, y=None, z=None):
         if z is not None:
             SerialLoop.send_param(PARAM_OFFSET_Z, z)
         SerialLoop.send_command(CMD_REF_RESTORE)
-
 
 
 def jobfile(filepath):
@@ -1070,14 +1060,14 @@ def job_laser(jobdict):
             pxsize = float(conf['pxsize'])
         pxsize = max(pxsize, 0.01)  # prevent div by 0
         intensity(0.0)
-        pxsize_2 = pxsize/2.0  # use 2x horiz resol.
+        pxsize_2 = pxsize / 2.0  # use 2x horiz resol.
         pixelwidth(pxsize_2)
         # assists on, beginning of pass if set to 'pass'
         if 'air_assist' in pass_:
             if pass_['air_assist'] == 'pass':
                 air_on()
         else:
-            air_on()    # also default this behavior
+            air_on()  # also default this behavior
         # if 'aux_assist' in pass_ and pass_['aux_assist'] == 'pass':
         #     aux_on()
         # seekrate
@@ -1109,12 +1099,12 @@ def job_laser(jobdict):
                 pos = def_["pos"]
                 size = def_["size"]
                 data = def_["data"]  # in base64, format: jpg, png, gif
-                px_w = int(size[0]/pxsize_2)
-                px_h = int(size[1]/pxsize)
+                px_w = int(size[0] / pxsize_2)
+                px_h = int(size[1] / pxsize)
                 # create image obj, convert to grayscale, scale, loop through lines
                 # print "--- start of image processing ---"
                 imgobj = Image.open(io.BytesIO(base64.b64decode(data[22:].encode('utf-8'))))
-                imgobj = imgobj.resize((px_w,px_h), resample=Image.BICUBIC)
+                imgobj = imgobj.resize((px_w, px_h), resample=Image.BICUBIC)
                 if imgobj.mode == 'RGBA':
                     imgbg = Image.new('RGBA', imgobj.size, (255, 255, 255))
                     imgbg.paste(imgobj, imgobj)
@@ -1144,14 +1134,14 @@ def job_laser(jobdict):
                 # if len(pxarray) % size[0] != 0:
                 #     print "ERROR: img length not divisable by width"
                 start = end = 0
-                line_y = posy + 0.5*pxsize
-                posleft = posx + 0.5*pxsize
-                posright = posx + size[0] - 0.5*pxsize
+                line_y = posy + 0.5 * pxsize
+                posleft = posx + 0.5 * pxsize
+                posright = posx + size[0] - 0.5 * pxsize
                 # print "mm: %s|%s|%s  h:%s" % (posleft-leadinpos, size[0], leadoutpos-posright, size[1])
                 # print "px: |%s|  raster_size:%s" % (px_w, pxsize)
                 # print len(pxarray)
                 # print (px_w*px_h)
-                line_count = int(size[1]/pxsize)
+                line_count = int(size[1] / pxsize)
                 for l in range(line_count):
                     end += px_w
                     # move to start of line
@@ -1234,12 +1224,11 @@ def job_laser(jobdict):
     feedrate(conf['seekrate'])
     intensity(0.0)
     if 'head' in jobdict and \
-       'noreturn' in jobdict['head'] and \
-       jobdict['head']['noreturn']:
+            'noreturn' in jobdict['head'] and \
+            jobdict['head']['noreturn']:
         pass
     else:
         move(0, 0, 0)
-
 
 
 def job_mill(jobdict):
@@ -1258,8 +1247,8 @@ def job_mill(jobdict):
     """
     # check job
     if (not 'head' in jobdict) or \
-       (not 'kind' in jobdict['head']) or \
-       (jobdict['head']['kind'] != 'mill'):
+            (not 'kind' in jobdict['head']) or \
+            (jobdict['head']['kind'] != 'mill'):
         print("NOTICE: not a mill job")
         return
 
@@ -1283,17 +1272,17 @@ def job_mill(jobdict):
                 if feedrate_active != seekrate:
                     feedrate(seekrate)
                     feedrate_active = seekrate
-                move(item[1][0],item[1][1],item[1][2])
+                move(item[1][0], item[1][1], item[1][2])
             elif item[0] == 'G1':
                 if feedrate_active != feedrate_:
                     feedrate(feedrate_)
                     feedrate_active = feedrate_
-                move(item[1][0],item[1][1],item[1][2])
+                move(item[1][0], item[1][1], item[1][2])
             elif item[0] == 'F':
                 feedrate_ = item[1]
             elif item[0] == 'S':
-                #convert RPMs to 0-100%
-                ipct = item[1]*(100.0/conf['mill_max_rpm'])
+                # convert RPMs to 0-100%
+                ipct = item[1] * (100.0 / conf['mill_max_rpm'])
                 intensity(ipct)
             elif item[0] == 'MIST':
                 if item[1] == True:
@@ -1313,9 +1302,6 @@ def job_mill(jobdict):
     intensity(0.0)
     supermove(z=0)
     supermove(x=0, y=0)
-
-
-
 
 
 if __name__ == "__main__":

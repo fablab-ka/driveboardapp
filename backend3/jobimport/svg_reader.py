@@ -1,4 +1,3 @@
-
 __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 import re
@@ -9,7 +8,6 @@ from .webcolors import hex_to_rgb, rgb_to_hex
 from .utilities import matrixMult, matrixApply, matrixApplyScale
 from .utilities import vertexScale, parseFloats, parseScalar
 from .svg_tag_reader import SVGTagReader
-
 
 logging.basicConfig()
 log = logging.getLogger("svg_reader")
@@ -81,8 +79,8 @@ class SVGReader:
 
         # tolerance settings, used in tessalation, path simplification, etc
         self.tolerance = tolerance
-        self.tolerance2 = tolerance**2
-        self.tolerance2_half = (0.5*tolerance)**2
+        self.tolerance2 = tolerance ** 2
+        self.tolerance2_half = (0.5 * tolerance) ** 2
         self.tolerance2_px = None
 
         # init helper object for tag reading
@@ -99,8 +97,6 @@ class SVGReader:
         # self.ignore_tags = {'defs':None, 'pattern':None, 'clipPath':None}
 
         self.rasters = []
-
-
 
     def parse(self, svgstring, force_dpi=None):
         """ Parse a SVG document.
@@ -157,7 +153,7 @@ class SVGReader:
 
         # 1. Get px2mm from argument
         if force_dpi is not None:
-            self.px2mm = 25.4/force_dpi
+            self.px2mm = 25.4 / force_dpi
             log.info("SVG import forced to %s dpi." % (force_dpi))
 
         # Get width, height, viewBox for further processing
@@ -202,7 +198,7 @@ class SVGReader:
                     vb_w = width
                     vb_h = height
 
-                self.px2mm = width/vb_w
+                self.px2mm = width / vb_w
 
                 if unit == 'mm':
                     # great, the svg file already uses mm
@@ -222,19 +218,19 @@ class SVGReader:
                     # 3. For some apps we can make a good guess.
                     svghead = svgstring[0:400]
                     if 'Inkscape' in svghead:
-                        self.px2mm *= 25.4/90.0
+                        self.px2mm *= 25.4 / 90.0
                         log.info("SVG exported with Inkscape -> 90dpi.")
                     elif 'Illustrator' in svghead:
-                        self.px2mm *= 25.4/72.0
+                        self.px2mm *= 25.4 / 72.0
                         log.info("SVG exported with Illustrator -> 72dpi.")
                     elif 'Intaglio' in svghead:
-                        self.px2mm *= 25.4/72.0
+                        self.px2mm *= 25.4 / 72.0
                         log.info("SVG exported with Intaglio -> 72dpi.")
                     elif 'CorelDraw' in svghead:
-                        self.px2mm *= 25.4/96.0
+                        self.px2mm *= 25.4 / 96.0
                         log.info("SVG exported with CorelDraw -> 96dpi.")
                     elif 'Qt' in svghead:
-                        self.px2mm *= 25.4/90.0
+                        self.px2mm *= 25.4 / 90.0
                         log.info("SVG exported with Qt lib -> 90dpi.")
                     else:
                         # give up in this step
@@ -245,17 +241,16 @@ class SVGReader:
 
         # 4. Get px2mm by the ratio of svg size to target size
         if not self.px2mm and (width and height):
-            self.px2mm = self._target_size[0]/width
+            self.px2mm = self._target_size[0] / width
             log.info("px2mm by target_size/page_size ratio")
-
 
         # 5. Fall back on px unit DPIs default value
         if not self.px2mm:
             log.warn("Failed to determin physical dimensions -> defaulting to 90dpi.")
-            self.px2mm = 25.4/90.0
+            self.px2mm = 25.4 / 90.0
 
         # adjust tolerances to px units
-        self.tolerance2_px = (self.tolerance/self.px2mm)*(self.tolerance/self.px2mm)
+        self.tolerance2_px = (self.tolerance / self.px2mm) * (self.tolerance / self.px2mm)
 
         # translation from viewbox
         if vb_x:
@@ -271,7 +266,7 @@ class SVGReader:
         # recursively parse children
         # output will be in self.boundarys
         node = {
-            'xformToWorld': [1,0,0,1,tx,ty],
+            'xformToWorld': [1, 0, 0, 1, tx, ty],
             'display': 'visible',
             'visibility': 'visible',
             'fill': '#000000',
@@ -284,7 +279,7 @@ class SVGReader:
         self.parse_children(svgRootElement, node)
 
         # build result dictionary
-        parse_results = {'dpi':round(25.4/self.px2mm)}
+        parse_results = {'dpi': round(25.4 / self.px2mm)}
 
         if self.boundarys:
             parse_results['boundarys'] = self.boundarys
@@ -297,8 +292,6 @@ class SVGReader:
 
         return parse_results
 
-
-
     def parse_children(self, domNode, parentNode):
         for child in domNode:
             # log.debug("considering tag: " + child.tag)
@@ -308,7 +301,7 @@ class SVGReader:
                 node = {
                     'paths': [],
                     'rasters': [],
-                    'xform': [1,0,0,1,0,0],
+                    'xform': [1, 0, 0, 1, 0, 0],
                     'xformToWorld': parentNode['xformToWorld'],
                     'display': parentNode.get('display'),
                     'visibility': parentNode.get('visibility'),
@@ -357,10 +350,6 @@ class SVGReader:
 
                 # recursive call
                 self.parse_children(child, node)
-
-
-
-
 
 # if __name__ == "__main__":
 #     # do something here when used directly

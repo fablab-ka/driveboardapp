@@ -24,29 +24,31 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
         BITRATE = "115200"
 
         if sys.platform == "darwin":  # OSX
-            AVRDUDEAPP    = os.path.join(resources_dir, "firmware/tools_osx/avrdude")
+            AVRDUDEAPP = os.path.join(resources_dir, "firmware/tools_osx/avrdude")
             AVRDUDECONFIG = os.path.join(resources_dir, "firmware/tools_osx/avrdude.conf")
             # chmod +x
             st = os.stat(AVRDUDEAPP)
             os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)
 
-        elif sys.platform == "win32": # Windows
-            AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude")
+        elif sys.platform == "win32":  # Windows
+            AVRDUDEAPP = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude")
             AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_win", "avrdude.conf")
 
-        elif sys.platform == "linux" or sys.platform == "linux2":  #Linux
+        elif sys.platform == "linux" or sys.platform == "linux2":  # Linux
             # AVRDUDEAPP    = os.path.join(resources_dir, "/usr/bin/avrdude")
             # AVRDUDECONFIG = os.path.join(resources_dir, "/etc/avrdude.conf")
             # AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude64")
-            AVRDUDEAPP    = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude")
+            AVRDUDEAPP = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude")
             AVRDUDECONFIG = os.path.join(resources_dir, 'firmware', "tools_linux", "avrdude.conf")
             # chmod +x
             # st = os.stat(AVRDUDEAPP)
             # os.chmod(AVRDUDEAPP, st.st_mode | stat.S_IEXEC)
 
         # call avrdude, returns 0 on success
-        command = ('"%(dude)s" -c %(programmer)s -b %(bps)s -P %(port)s -p %(device)s -C "%(dudeconf)s" -Uflash:w:"%(firmware)s":i'
-            % {'dude':AVRDUDEAPP, 'programmer':PROGRAMMER, 'bps':BITRATE, 'port':serial_port, 'device':DEVICE, 'dudeconf':AVRDUDECONFIG, 'firmware':FIRMWARE})
+        command = (
+                    '"%(dude)s" -c %(programmer)s -b %(bps)s -P %(port)s -p %(device)s -C "%(dudeconf)s" -Uflash:w:"%(firmware)s":i'
+                    % {'dude': AVRDUDEAPP, 'programmer': PROGRAMMER, 'bps': BITRATE, 'port': serial_port,
+                       'device': DEVICE, 'dudeconf': AVRDUDECONFIG, 'firmware': FIRMWARE})
 
         print(command)
         return subprocess.call(command, shell=True)
@@ -56,7 +58,7 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
         #     % {'dude':AVRDUDEAPP, 'programmer':PROGRAMMER, 'bps':BITRATE, 'port':serial_port, 'device':DEVICE, 'dudeconf':AVRDUDECONFIG, 'firmware':FIRMWARE})
 
         # fuse setting taken over from Makefile for reference
-        #os.system('%(dude)s -U hfuse:w:0xd2:m -U lfuse:w:0xff:m' % {'dude':AVRDUDEAPP})
+        # os.system('%(dude)s -U hfuse:w:0xd2:m -U lfuse:w:0xff:m' % {'dude':AVRDUDEAPP})
 
     elif conf['hardware'] == 'beaglebone' or conf['hardware'] == 'raspberrypi':
         # Make sure you have avrdude installed:
@@ -67,16 +69,18 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
         # raspberrypi:
         # sudo apt-get install avrdude
 
-        AVRDUDEAPP    = "avrdude"
+        AVRDUDEAPP = "avrdude"
         AVRDUDECONFIG = "/etc/avrdude.conf"
         SERIAL_PORT = serial_port
         DEVICE = "atmega328p"
-        PROGRAMMER = "arduino"    # use this for bootloader
-        SERIAL_OPTION = '-P %(port)s' % {'port':SERIAL_PORT}
+        PROGRAMMER = "arduino"  # use this for bootloader
+        SERIAL_OPTION = '-P %(port)s' % {'port': SERIAL_PORT}
         BITRATE = "115200"
 
-        command = ('"%(dude)s" -c %(programmer)s -b %(bps)s %(serial_option)s -p %(device)s -C "%(dudeconf)s" -Uflash:w:"%(product)s":i' %
-                  {'dude':AVRDUDEAPP, 'programmer':PROGRAMMER, 'bps':BITRATE, 'serial_option':SERIAL_OPTION, 'device':DEVICE, 'dudeconf':AVRDUDECONFIG, 'product':FIRMWARE})
+        command = (
+                    '"%(dude)s" -c %(programmer)s -b %(bps)s %(serial_option)s -p %(device)s -C "%(dudeconf)s" -Uflash:w:"%(product)s":i' %
+                    {'dude': AVRDUDEAPP, 'programmer': PROGRAMMER, 'bps': BITRATE, 'serial_option': SERIAL_OPTION,
+                     'device': DEVICE, 'dudeconf': AVRDUDECONFIG, 'product': FIRMWARE})
 
         ### Trigger the atmega328's reset pin to invoke bootloader
 
@@ -131,6 +135,7 @@ def flash_upload(serial_port=conf['serial_port'], resources_dir=conf['rootdir'],
                 time.sleep(0.8)
                 GPIO.output(pinReset, GPIO.HIGH)
                 time.sleep(0.1)
+
             _thread.start_new_thread(trigger_reset, ())
             # GPIO.setmode(GPIO.BCM)  # use chip pin number
             # pinReset = 2
@@ -194,7 +199,7 @@ def usb_reset_hack():
     # fails after replugging the usb arduino. It seems strictly related
     # to the USB stack on the Linux dev machine (possibly also on OSX or Win).
     # Note: This should be irrelevant on the Lasersaur/BBB.
-    command = "avrdude -p atmega328p -P "+conf['serial_port']+" -c arduino -U flash:r:flash.bin:r -q -q"
+    command = "avrdude -p atmega328p -P " + conf['serial_port'] + " -c arduino -U flash:r:flash.bin:r -q -q"
     return subprocess.call(command, shell=True)
 
 

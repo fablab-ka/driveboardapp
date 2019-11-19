@@ -57,6 +57,7 @@ class Sections(object):
         except KeyError:
             raise AttributeError(key)
 
+
 SECTIONMAP = {
     'TABLES': TablesSection,
     'ENTITIES': EntitySection,

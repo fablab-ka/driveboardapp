@@ -19,7 +19,7 @@ class DXFObject(object):
     def setup_attributes(self, tags):
         self.dxftype = tags.get_type()
         for code, value in tags.plain_tags():
-            if code == 5:   # special case 105 handled by STYLE TABLE
+            if code == 5:  # special case 105 handled by STYLE TABLE
                 self.handle = value
             elif code == 330:
                 self.owner = value
@@ -85,6 +85,7 @@ class Sun(DXFObject):
             date = datetime.now()
         hours, minutes, seconds = unpack_seconds(time)
         self.date = datetime(date.year, date.month, date.day, hours, minutes, seconds)
+
 
 ObjectsTable = {
     'SUN': Sun,

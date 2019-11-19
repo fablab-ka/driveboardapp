@@ -33,9 +33,7 @@ import base64
 import requests
 import logging
 
-
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
-
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 thislocation = os.path.dirname(os.path.realpath(__file__))
 
@@ -68,14 +66,11 @@ class Lasersaur(object):
 
         if not r.ok:
             if r.status_code == 400:
-                print("WEB ERROR: "+r.text[r.text.find('<pre>')+5:r.text.find('</pre>')])
+                print("WEB ERROR: " + r.text[r.text.find('<pre>') + 5:r.text.find('</pre>')])
             r.raise_for_status()
 
         if ret:
             return r.json()
-
-
-
 
     ### LOW-LEVEL
 
@@ -122,7 +117,7 @@ class Lasersaur(object):
         self._request('/absolute')
 
     def move(self, x, y, z=0.0):
-        self._request('/move/%.4f/%.4f/%.4f' % (x,y,z))
+        self._request('/move/%.4f/%.4f/%.4f' % (x, y, z))
 
     def air_on(self):
         self._request('/air_on')
@@ -137,13 +132,10 @@ class Lasersaur(object):
         self._request('/aux_off')
 
     def offset(self, x, y, z=0.0):
-        self._request('/offset/%.4f/%.4f/%.4f' % (x,y,z))
+        self._request('/offset/%.4f/%.4f/%.4f' % (x, y, z))
 
     def clear_offset(self):
         self._request('/clear_offset')
-
-
-
 
     ### JOBS QUEUE
 
@@ -158,7 +150,7 @@ class Lasersaur(object):
         Returns:
             A parsed .dba job.
         """
-        import jobimport # dependancy only when actually needed
+        import jobimport  # dependancy only when actually needed
         name_f = os.path.basename(jobfile)
         with open(jobfile) as fp:
             job = fp.read()
@@ -168,7 +160,6 @@ class Lasersaur(object):
         else:
             job = jobimport.convert(job, optimize=optimize)
         return job
-
 
     def convert_file(self, jobfile, optimize=True, tolerance=None):
         """Convert any job file to a .dba file.
@@ -181,17 +172,15 @@ class Lasersaur(object):
         Output:
             A .dba file in the same directory called <name>.conv.dba
         """
-        import jobimport # dependancy only when actually needed
+        import jobimport  # dependancy only when actually needed
         base, name = os.path.split(jobfile)
         name, ext = os.path.splitext(name)
         job = self.open_file(jobfile, optimize=optimize, tolerance=tolerance)
         job = json.dumps(job)
         outfile = os.path.join(base, "%s.conv.dba" % (name))
-        with open(outfile,'w') as fp:
+        with open(outfile, 'w') as fp:
             fp.write(job)
         print("INFO: job file written to: %s" % outfile)
-
-
 
     def load(self, job, name="job", optimize=True):
         """Load a job to the machine.
@@ -214,10 +203,9 @@ class Lasersaur(object):
             name_<numeral>.
         """
         if type(job) is dict:
-            job =  json.dumps(job)
-        load_request = json.dumps({"job": job, "name":name, "optimize": optimize})
-        return self._request('/load', postdict={'load_request':load_request}, ret=True)
-
+            job = json.dumps(job)
+        load_request = json.dumps({"job": job, "name": name, "optimize": optimize})
+        return self._request('/load', postdict={'load_request': load_request}, ret=True)
 
     def load_file(self, jobfile, optimize=True, tolerance=None):
         """Convert any job file to a .dba file.
@@ -231,12 +219,11 @@ class Lasersaur(object):
             Unique name give to the job. This is either name or
             name_<numeral>.
         """
-        import jobimport # dependancy only when actually needed
+        import jobimport  # dependancy only when actually needed
         base, name = os.path.split(jobfile)
         name, ext = os.path.splitext(name)
         job = self.open_file(jobfile, optimize=optimize, tolerance=tolerance)
         return self.load(job, name, optimize=False)
-
 
     def load_path(self, path, feedrate, intensity):
         """Create and load a job from list of polylines.
@@ -245,15 +232,15 @@ class Lasersaur(object):
         and can be 2D or 3D.
         """
         job = {
-            "vector":{
-                "passes":[
+            "vector": {
+                "passes": [
                     {
-                        "path":[0],
-                        "feedrate":feedrate,
-                        "intensity":intensity
+                        "path": [0],
+                        "feedrate": feedrate,
+                        "intensity": intensity
                     }
                 ],
-                "paths":[
+                "paths": [
                     path
                 ]
             }
@@ -270,19 +257,19 @@ class Lasersaur(object):
             feedrate: raster speed
             intensity: raster intensity
         """
-        with open(image,'rb') as fp:
+        with open(image, 'rb') as fp:
             img = fp.read()
         img_b64 = base64.encodestring(img).decode("utf8")
         job = {
-            "raster":{
-                "passes":[
+            "raster": {
+                "passes": [
                     {
                         "images": [0],
                         "feedrate": feedrate,
                         "intensity": intensity,
                     },
                 ],
-                "images":[
+                "images": [
                     {
                         "pos": pos,
                         "size": size,
@@ -323,7 +310,6 @@ class Lasersaur(object):
         """Clear job list (does not delete starred jobs)."""
         self._request('/clear')
 
-
     ### LIBRARY
 
     def listing_library(self):
@@ -332,12 +318,11 @@ class Lasersaur(object):
 
     def get_library(self, jobname):
         """Get a library job in .dba format."""
-        return self._request('/get_library/'+jobname, ret=True)
+        return self._request('/get_library/' + jobname, ret=True)
 
     def load_library(self, jobname):
         """Load a library job into the queue."""
         return self._request('/load_library/%s' % (jobname), ret=True)
-
 
     ### JOB EXECUTION
 
@@ -346,7 +331,7 @@ class Lasersaur(object):
         self._request('/run/%s' % jobname)
         if progress:
             print('Processing [                                        ]', end=' ')
-            print('\b'*42, end=' ')
+            print('\b' * 42, end=' ')
             sys.stdout.flush()
             time.sleep(0.6)
             stat = self.status()
@@ -360,7 +345,6 @@ class Lasersaur(object):
                 stat = self.status()
             print('\b]  Done!')
 
-
     def run_file(self, jobfile, feedrate=None, intensity=0, progress=True, local=False):
         """A quick way to run a job"""
         base, name = os.path.split(jobfile)
@@ -371,17 +355,16 @@ class Lasersaur(object):
                 # file has no pass info | feedrate is specified
                 if feedrate is None: feedrate = 4000
                 job['vector']['passes'] = [{
-                        "paths":list(range(len(job['vector']['paths']))),  # apply to all path
-                        "feedrate":feedrate,
-                        "intensity":intensity
-                    }]
+                    "paths": list(range(len(job['vector']['paths']))),  # apply to all path
+                    "feedrate": feedrate,
+                    "intensity": intensity
+                }]
         if local:
             self.host = '127.0.0.1'
             self.port = 4444
         jobname = lasersaur.load(job, name=name, optimize=False)
         lasersaur.run(jobname, progress=progress)
         return jobname
-
 
     def pause(self):
         """Pause a job gracefully."""
@@ -407,8 +390,7 @@ class Lasersaur(object):
             time.sleep(1)
         self.stop()
         self.unstop()
-        self.move(0,0,0)
-
+        self.move(0, 0, 0)
 
     ### MCU MANAGMENT
 
@@ -417,20 +399,18 @@ class Lasersaur(object):
         if firmware_name:
             self._request('/build')
         else:
-            self._request('/build/'+firmware_name)
+            self._request('/build/' + firmware_name)
 
     def flash(self, firmware_name=None):
         """Flash firmware to MCU."""
         if firmware_name:
             self._request('/flash')
         else:
-            self._request('/flash/'+firmware_name)
+            self._request('/flash/' + firmware_name)
 
     def reset(self):
         """Reset MCU"""
         self._request('/reset')
-
-
 
 
 ###########################################################################
@@ -490,15 +470,13 @@ def local():
     lasersaur.port = 4444
 
 
-
-
 if __name__ == '__main__':
     jobname = lasersaur.load_library('lasersaur')
     if lasersaur.ready():
-      lasersaur.run(jobname)
+        lasersaur.run(jobname)
 
     while not lasersaur.ready():
-      print("%s done!" % (lasersaur.status()['progress']))
-      time.sleep(1)
+        print("%s done!" % (lasersaur.status()['progress']))
+        time.sleep(1)
 
     print("job done")

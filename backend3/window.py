@@ -9,7 +9,7 @@ import tkinter as tk
 
 from config import conf
 
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 def init():
@@ -19,18 +19,18 @@ def init():
     root.tk.call('wm', 'iconphoto', root._w, img)
     # root.iconify()  # not working as expected on osx
 
-
     # text widget
     text = tk.Text(root)
     text.pack()
+
     # add copy to clipboard feature
     def copy(event):
         selected = text.get("sel.first", "sel.last")
         if selected:
             root.clipboard_clear()
             root.clipboard_append(selected)
-    text.bind("<Control-c>", copy)
 
+    text.bind("<Control-c>", copy)
 
     # open frontend button
     def open_browser():
@@ -39,8 +39,8 @@ def init():
             webbrowser.open_new_tab('http://127.0.0.1:4444')
         except webbrowser.Error:
             print("Cannot open Webbrowser, please do so manually.")
-    tk.Button(root, text="Open in Browser", command=open_browser).pack()
 
+    tk.Button(root, text="Open in Browser", command=open_browser).pack()
 
     # output queue, required because of tkinter thread issues
     q = queue.Queue()
@@ -48,6 +48,7 @@ def init():
     class OutputHandler(object):
         def write(self, msg):
             q.put(msg)
+
         def flush(self):
             pass
 
@@ -57,9 +58,9 @@ def init():
     sys.stdout = output
     sys.stderr = output
 
-
     # output consumer, a recursive tkinter callback
     update_callback_id = None
+
     def iterex(function, exception):
         # helper func, like builtin iter() but stops on exception
         try:
@@ -78,8 +79,8 @@ def init():
                 root.focus()
         global update_callback_id
         update_callback_id = root.after(40, update, q)  # schedule next update
-    update(q)  # start recursive updates
 
+    update(q)  # start recursive updates
 
     # good exiting behavior
     def quit():
@@ -88,9 +89,9 @@ def init():
         sys.stdout = stdout_old
         sys.stderr = stderr_old
         root.destroy()
+
     root.protocol("WM_DELETE_WINDOW", quit)
     root.bind("<Control-q>", lambda event: quit())
-
 
     return root
 

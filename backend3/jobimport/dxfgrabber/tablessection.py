@@ -20,13 +20,13 @@ TABLENAMES = {
     'view': 'views',
     'vport': 'viewports',
     'block_record': 'block_records',
-    }
+}
 
 
 def tablename(dxfname):
     """ Translate DXF-table-name to attribute-name. ('LAYER' -> 'layers') """
     name = dxfname.lower()
-    return TABLENAMES.get(name, name+'s')
+    return TABLENAMES.get(name, name + 's')
 
 
 class DefaultDrawing(object):
@@ -73,6 +73,7 @@ class TablesSection(object):
             return self._tables[key]
         except KeyError:
             raise AttributeError(key)
+
 
 # support for further tables types are possible
 TABLESMAP = {

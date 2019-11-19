@@ -10,7 +10,6 @@ import web
 import lasersaur
 from config import conf
 
-
 # assertEqual(a, b)
 # assertNotEqual(a, b)
 # assertTrue(x)
@@ -53,9 +52,9 @@ def setUpModule():
     time.sleep(0.5)
     lasersaur.local()
 
+
 def tearDownModule():
     web.stop()
-
 
 
 class TestLowLevel(unittest.TestCase):
@@ -89,15 +88,15 @@ class TestLowLevel(unittest.TestCase):
         self.assertAlmostEqual(pos[0], stepX(0), DEC)
         self.assertAlmostEqual(pos[1], stepY(0), DEC)
         self.assertAlmostEqual(pos[2], stepZ(0), DEC)
-        lasersaur.move(3,4,5)
+        lasersaur.move(3, 4, 5)
         time.sleep(2)
         pos = lasersaur.status()['pos']
         self.assertAlmostEqual(pos[0], stepX(3), DEC)
         self.assertAlmostEqual(pos[1], stepY(4), DEC)
         self.assertAlmostEqual(pos[2], stepZ(5), DEC)
-        #relative
+        # relative
         lasersaur.relative()
-        lasersaur.move(2,2,2)
+        lasersaur.move(2, 2, 2)
         time.sleep(2)
         pos = lasersaur.status()['pos']
         self.assertAlmostEqual(pos[0], stepX(5), DEC)
@@ -105,7 +104,7 @@ class TestLowLevel(unittest.TestCase):
         self.assertAlmostEqual(pos[2], stepZ(7), DEC)
         # absolute after relative
         lasersaur.absolute()
-        lasersaur.move(0,0,0)
+        lasersaur.move(0, 0, 0)
         time.sleep(2)
         pos = lasersaur.status()['pos']
         self.assertAlmostEqual(pos[0], stepX(0), DEC)
@@ -114,13 +113,13 @@ class TestLowLevel(unittest.TestCase):
 
     def test_offset(self):
         lasersaur.absolute()
-        lasersaur.move(15.123,15.123,15.123)
+        lasersaur.move(15.123, 15.123, 15.123)
         time.sleep(2)
         pos = lasersaur.status()['pos']
         self.assertAlmostEqual(pos[0], stepX(15.123), DEC)
         self.assertAlmostEqual(pos[1], stepY(15.123), DEC)
         self.assertAlmostEqual(pos[2], stepZ(15.123), DEC)
-        lasersaur.offset(4,4,4)
+        lasersaur.offset(4, 4, 4)
         time.sleep(1)
         off = lasersaur.status()['offset']
         self.assertAlmostEqual(off[0], 4, DEC)
@@ -132,7 +131,7 @@ class TestLowLevel(unittest.TestCase):
         self.assertAlmostEqual(pos[1], stepY(11.123, 4), DEC)
         self.assertAlmostEqual(pos[2], stepZ(11.123, 4), DEC)
         # move with offset
-        lasersaur.move(16.543,16.543,16.543)
+        lasersaur.move(16.543, 16.543, 16.543)
         time.sleep(2)
         pos = lasersaur.status()['pos']
         self.assertAlmostEqual(pos[0], stepX(16.543, 4), DEC)
@@ -152,17 +151,17 @@ class TestLowLevel(unittest.TestCase):
         self.assertAlmostEqual(pos[2], stepZ(20.543), DEC)
 
 
-
 def stepX(val, off1=0, off2=X_ORIGIN_OFFSET):
     # round val to discreet pos a stepper can be in
-    return (round((val+off1+off2)*X_STEPS_PER_MM)/X_STEPS_PER_MM)-off1-off2
+    return (round((val + off1 + off2) * X_STEPS_PER_MM) / X_STEPS_PER_MM) - off1 - off2
+
+
 def stepY(val, off1=0, off2=Y_ORIGIN_OFFSET):
-    return (round((val+off1+off2)*Y_STEPS_PER_MM)/Y_STEPS_PER_MM)-off1-off2
+    return (round((val + off1 + off2) * Y_STEPS_PER_MM) / Y_STEPS_PER_MM) - off1 - off2
+
+
 def stepZ(val, off1=0, off2=Z_ORIGIN_OFFSET):
-    return (round((val+off1+off2)*Z_STEPS_PER_MM)/Z_STEPS_PER_MM)-off1-off2
-
-
-
+    return (round((val + off1 + off2) * Z_STEPS_PER_MM) / Z_STEPS_PER_MM) - off1 - off2
 
 
 class TestQueue(unittest.TestCase):
@@ -181,7 +180,7 @@ class TestQueue(unittest.TestCase):
         jobs = lasersaur.listing()
         self.assertIsInstance(jobs, list)
         self.assertListEqual(jobs, [])
-        #library
+        # library
         lib = lasersaur.listing_library()
         self.assertIsInstance(lib, list)
         self.assertIn('lasersaur', lib)
@@ -216,18 +215,18 @@ class TestQueue(unittest.TestCase):
         jobs = lasersaur.listing()
         self.assertIsInstance(jobs, list)
         self.assertIn('lasersaur', jobs)
-        #del
+        # del
         lasersaur.remove('lasersaur')
         jobs = lasersaur.listing()
         self.assertIsInstance(jobs, list)
         self.assertListEqual(jobs, [])
-        #delete of starred file
+        # delete of starred file
         lasersaur.load_library('lasersaur')
         lasersaur.star('lasersaur')
         lasersaur.remove('lasersaur')
         jobs = lasersaur.listing()
         self.assertListEqual(jobs, [])
-        #constant job nums on add
+        # constant job nums on add
         for i in range(conf['max_jobs_in_list'] + 3):
             lasersaur.load_library('lasersaur')
         jobs = lasersaur.listing()
@@ -238,18 +237,17 @@ class TestQueue(unittest.TestCase):
         self.assertListEqual(jobs, [])
 
 
-
 class TestJobs(unittest.TestCase):
 
     def testLoad(self):
-        jobfile = os.path.join(thislocation,'testjobs','full-bed.svg')
+        jobfile = os.path.join(thislocation, 'testjobs', 'full-bed.svg')
         job = lasersaur.open_file(jobfile)
         if 'vector' in job:
             job['vector']['passes'] = [{
-                    "paths":[0],
-                    "feedrate":4000,
-                    "intensity":53
-                }]
+                "paths": [0],
+                "feedrate": 4000,
+                "intensity": 53
+            }]
         jobname = lasersaur.load(job)
         self.assertIn(jobname, lasersaur.listing())
         lasersaur.run(jobname, progress=True)

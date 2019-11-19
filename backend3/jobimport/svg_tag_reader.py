@@ -1,4 +1,3 @@
-
 __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 import re
@@ -39,9 +38,9 @@ class SVGTagReader:
             'text': True  # text is special, see read_tag func
         }
 
-        self.re_findall_lasertags = re.compile('=pass([0-9]+):([0-9]*)(mm\/min)?:([0-9]*)(%)?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?=').findall
+        self.re_findall_lasertags = re.compile(
+            '=pass([0-9]+):([0-9]*)(mm\/min)?:([0-9]*)(%)?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?(:#[a-fA-F0-9]{6})?=').findall
         self.re_match_imagemime = re.compile('data:image/(png);base64,', re.IGNORECASE).match
-
 
     def read_tag(self, tag, node):
         """Read a tag.
@@ -62,7 +61,7 @@ class SVGTagReader:
         if tagName in self._handlers:
             # log.debug("reading tag: " + tagName)
             # parse own attributes and overwrite in node
-            for attr,value in list(tag.attrib.items()):
+            for attr, value in list(tag.attrib.items()):
                 # log.debug("considering attrib: " + attr)
                 self._attribReader.read_attrib(node, attr, value)
             # accumulate transformations
@@ -73,17 +72,14 @@ class SVGTagReader:
             else:
                 self.find_cut_settings_tags(tag, node)
 
-
     def has_handler(self, tag):
         tagName = self._get_tag(tag)
         return bool(tagName in self._handlers)
-
 
     def g(self, node):
         # http://www.w3.org/TR/SVG11/struct.html#Groups
         # has transform and style attributes
         pass
-
 
     def path(self, node):
         # http://www.w3.org/TR/SVG11/paths.html
@@ -91,7 +87,6 @@ class SVGTagReader:
         if self._has_valid_stroke(node):
             d = node.get("d")
             self._pathReader.add_path(d, node)
-
 
     def polygon(self, node):
         # http://www.w3.org/TR/SVG11/shapes.html#PolygonElement
@@ -101,7 +96,6 @@ class SVGTagReader:
             node['points'] = None
             self._pathReader.add_path(d, node)
 
-
     def polyline(self, node):
         # http://www.w3.org/TR/SVG11/shapes.html#PolylineElement
         # has transform and style attributes
@@ -109,7 +103,6 @@ class SVGTagReader:
             d = ['M'] + node['points']
             node['points'] = None
             self._pathReader.add_path(d, node)
-
 
     def rect(self, node):
         # http://www.w3.org/TR/SVG11/shapes.html#RectElement
@@ -124,29 +117,28 @@ class SVGTagReader:
             if rx is None and ry is None:  # no rounded corners
                 d = ['M', x, y, 'h', w, 'v', h, 'h', -w, 'z']
                 self._pathReader.add_path(d, node)
-            else:                         # rounded corners
+            else:  # rounded corners
                 if rx is None:
                     rx = ry
                 elif ry is None:
                     ry = rx
-                if rx > w/2.0:
-                    rx = w/2.0
-                if ry > h/2.0:
-                    rx = h/2.0
-                if rx < 0.0: rx *=-1
-                if ry < 0.0: ry *=-1
-                d = ['M', x+rx , y ,
-                     'h', w-2*rx,
+                if rx > w / 2.0:
+                    rx = w / 2.0
+                if ry > h / 2.0:
+                    rx = h / 2.0
+                if rx < 0.0: rx *= -1
+                if ry < 0.0: ry *= -1
+                d = ['M', x + rx, y,
+                     'h', w - 2 * rx,
                      'c', rx, 0.0, rx, ry, rx, ry,
-                     'v', h-2*ry,
+                     'v', h - 2 * ry,
                      'c', 0.0, ry, -rx, ry, -rx, ry,
-                     'h', -w+2*rx,
+                     'h', -w + 2 * rx,
                      'c', -rx, 0.0, -rx, -ry, -rx, -ry,
-                     'v', -h+2*ry,
+                     'v', -h + 2 * ry,
                      'c', 0.0, 0.0, 0.0, -ry, rx, -ry,
                      'z']
                 self._pathReader.add_path(d, node)
-
 
     def line(self, node):
         # http://www.w3.org/TR/SVG11/shapes.html#LineElement
@@ -159,7 +151,6 @@ class SVGTagReader:
             d = ['M', x1, y1, 'L', x2, y2]
             self._pathReader.add_path(d, node)
 
-
     def circle(self, node):
         # http://www.w3.org/TR/SVG11/shapes.html#CircleElement
         # has transform and style attributes
@@ -168,14 +159,13 @@ class SVGTagReader:
             cx = node.get('cx') or 0.0
             cy = node.get('cy') or 0.0
             if r > 0.0:
-                d = ['M', cx-r, cy,
-                     'A', r, r, 0.0, 0.0, 0.0, cx, cy+r,
-                     'A', r, r, 0.0, 0.0, 0.0, cx+r, cy,
-                     'A', r, r, 0.0, 0.0, 0.0, cx, cy-r,
-                     'A', r, r, 0.0, 0.0, 0.0, cx-r, cy,
+                d = ['M', cx - r, cy,
+                     'A', r, r, 0.0, 0.0, 0.0, cx, cy + r,
+                     'A', r, r, 0.0, 0.0, 0.0, cx + r, cy,
+                     'A', r, r, 0.0, 0.0, 0.0, cx, cy - r,
+                     'A', r, r, 0.0, 0.0, 0.0, cx - r, cy,
                      'Z']
                 self._pathReader.add_path(d, node)
-
 
     def ellipse(self, node):
         # has transform and style attributes
@@ -185,14 +175,13 @@ class SVGTagReader:
             cx = node.get('cx') or 0.0
             cy = node.get('cy') or 0.0
             if rx > 0.0 and ry > 0.0:
-                d = ['M', cx-rx, cy,
-                     'A', rx, ry, 0.0, 0.0, 0.0, cx, cy+ry,
-                     'A', rx, ry, 0.0, 0.0, 0.0, cx+rx, cy,
-                     'A', rx, ry, 0.0, 0.0, 0.0, cx, cy-ry,
-                     'A', rx, ry, 0.0, 0.0, 0.0, cx-rx, cy,
+                d = ['M', cx - rx, cy,
+                     'A', rx, ry, 0.0, 0.0, 0.0, cx, cy + ry,
+                     'A', rx, ry, 0.0, 0.0, 0.0, cx + rx, cy,
+                     'A', rx, ry, 0.0, 0.0, 0.0, cx, cy - ry,
+                     'A', rx, ry, 0.0, 0.0, 0.0, cx - rx, cy,
                      'Z']
                 self._pathReader.add_path(d, node)
-
 
     def image(self, node):
         # has transform and style attributes
@@ -218,8 +207,6 @@ class SVGTagReader:
         raster['data'] = image
         node['rasters'].append(raster)
 
-
-
     def defs(self, node):
         # not supported
         # http://www.w3.org/TR/SVG11/struct.html#Head
@@ -232,8 +219,6 @@ class SVGTagReader:
         # instead presentation attributes and the 'style' attribute
         log.warn("'style' tag is not supported, use presentation \
                       attributes or the style attribute instead")
-
-
 
     def find_cut_settings_tags(self, tag, node):
         # Parse special text used for setting lasersaur cut
@@ -266,19 +251,17 @@ class SVGTagReader:
             if vals[3]:
                 vals[3] = int(vals[3])
             # colors, strip leading column
-            for ii in range(5,11):
+            for ii in range(5, 11):
                 vals[ii] = vals[ii][1:]
             matches[i] = vals
         # store in the following format
         # [(12, 2550, '', 100, '%', '#fff000', '#ababab', '#ccc999', '', '', '')]
         node['lasertags'] = matches
 
-
     def _get_tag(self, domNode):
         """Get tag name without possible namespace prefix."""
         tag = domNode.tag
-        return tag[tag.rfind('}')+1:]
-
+        return tag[tag.rfind('}') + 1:]
 
     def _has_valid_stroke(self, node):
         # http://www.w3.org/TR/SVG11/styling.html#SVGStylingProperties
@@ -288,9 +271,9 @@ class SVGTagReader:
         stroke_opacity = node.get('stroke-opacity')
         color = node.get('color')
         opacity = node.get('opacity')
-        return bool( display and display != 'none' and
-                     visibility and visibility != 'hidden' and visibility != 'collapse' and
-                     stroke_color and stroke_color[0] == '#' and
-                     stroke_opacity and stroke_opacity != 0.0 and
-                     color and color[0] == '#' and
-                     opacity and opacity != 0.0 )
+        return bool(display and display != 'none' and
+                    visibility and visibility != 'hidden' and visibility != 'collapse' and
+                    stroke_color and stroke_color[0] == '#' and
+                    stroke_opacity and stroke_opacity != 0.0 and
+                    color and color[0] == '#' and
+                    opacity and opacity != 0.0)

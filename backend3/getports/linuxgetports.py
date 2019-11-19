@@ -2,10 +2,11 @@
 
 import glob
 
-sys_prefix = b'/sys/class/tty/' # listing of all TTY devices connected
-sys_suffix = b'/device/' # that are actual devices
+sys_prefix = b'/sys/class/tty/'  # listing of all TTY devices connected
+sys_suffix = b'/device/'  # that are actual devices
 sys_search = sys_prefix + b'*' + sys_suffix
-dev_prefix = b'/dev/' # address for accessing such devices
+dev_prefix = b'/dev/'  # address for accessing such devices
+
 
 # you can also do a glob of /dev directly, something like '/dev/ttyS*', but that is somewhat more fragile
 

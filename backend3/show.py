@@ -11,9 +11,7 @@ import glib
 import lasersaur
 import jobimport
 
-
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
-
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 
 class PyApp(gtk.Window):
@@ -31,7 +29,7 @@ class PyApp(gtk.Window):
         # exit with ctr-q
         accel_group = gtk.AccelGroup()
         accel_group.connect_group(ord('q'), gtk.gdk.CONTROL_MASK,
-        gtk.ACCEL_LOCKED, gtk.main_quit)
+                                  gtk.ACCEL_LOCKED, gtk.main_quit)
         self.add_accel_group(accel_group)
 
         self.darea = gtk.DrawingArea()
@@ -41,21 +39,19 @@ class PyApp(gtk.Window):
         if args.animate:
             self.timer = True
             if args.fast:
-                glib.timeout_add(10, self.on_timer)  #100fps
+                glib.timeout_add(10, self.on_timer)  # 100fps
                 self.inc = 8
             else:
-                glib.timeout_add(40, self.on_timer)  #25fps
+                glib.timeout_add(40, self.on_timer)  # 25fps
                 self.inc = 4
             self.todraw = self.inc
 
         self.show_all()
 
-
     def on_timer(self):
         if not self.timer: return False
         self.darea.queue_draw()
         return True
-
 
     def expose(self, widget, event):
         global job, args, total_points
@@ -70,7 +66,7 @@ class PyApp(gtk.Window):
         seeks = widget.window.cairo_create()
         seeks.set_source_rgb(0.7, 0.7, 0.7)
         seeks.set_line_width(1)
-        seeks.move_to(0,0)
+        seeks.move_to(0, 0)
 
         if args.animate:
             count = 0
@@ -108,9 +104,6 @@ class PyApp(gtk.Window):
         cr.stroke()
 
 
-
-
-
 if __name__ == '__main__':
     ### Setup Argument Parser
     argparser = argparse.ArgumentParser(description='Show job file.', prog='show.py')
@@ -132,7 +125,7 @@ if __name__ == '__main__':
         with open(jobfile) as fp:
             job = fp.read()
         job = jobimport.convert(job, tolerance=float(args.tolerance),
-                                     optimize=not(args.nooptimize))
+                                optimize=not (args.nooptimize))
 
         # stats
         total_points = 0

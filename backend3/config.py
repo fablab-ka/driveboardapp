@@ -25,27 +25,26 @@ from encodings import ascii  # explicit for pyinstaller
 from encodings import utf_8  # explicit for pyinstaller
 from encodings import mac_roman  # explicit for pyinstaller
 
-
 conf = {
     'appname': 'driveboardapp',
     'version': '18.07',
     'company_name': 'com.nortd.labs',
-    'network_host': '',                    # '' for all nics
+    'network_host': '',  # '' for all nics
     'network_port': 4444,
-    'serial_port': '',                     # set to '' for auto (req. firmware)
+    'serial_port': '',  # set to '' for auto (req. firmware)
     'baudrate': 57600,
-    'rootdir': None,                       # defined further down (../)
-    'confdir': None,                       # defined further down
-    'hardware': None,                      # defined further down
-    'firmware': None,                      # defined further down
+    'rootdir': None,  # defined further down (../)
+    'confdir': None,  # defined further down
+    'hardware': None,  # defined further down
+    'firmware': None,  # defined further down
     'tolerance': 0.01,
-    'workspace': [1220,610,0],
+    'workspace': [1220, 610, 0],
     'grid_mm': 100,
     'seekrate': 6000,
     'feedrate': 2000,
     'intensity': 0,
     'kerf': 0.3,
-    'pxsize': 0.4,                 # size (mm) of beam for rastering
+    'pxsize': 0.4,  # size (mm) of beam for rastering
     'max_jobs_in_list': 20,
     'usb_reset_hack': False,
     'fill_leadin': 10,
@@ -54,7 +53,7 @@ conf = {
     'users': {
         'laser': 'laser',
     },
-    'enable_gzip': True,           # allow gzip upload of files / jobs
+    'enable_gzip': True,  # allow gzip upload of files / jobs
     'mill_mode': False,
     'mill_max_rpm': 18000,
 }
@@ -80,7 +79,6 @@ userconfigurable = {
     'mill_mode': "Activate CNC mill mode.",
     'mill_max_rpm': "Maximum spindle RPM."
 }
-
 
 ### make some 'smart' default setting choices
 
@@ -119,13 +117,13 @@ conf['confdir'] = directory
 ###
 
 
-
 ### auto-check hardware
 #
 conf['hardware'] = 'standard'
 if sys.platform == "linux2":
     try:
         import RPi.GPIO
+
         conf['hardware'] = 'raspberrypi'
     except ImportError:
         # os.uname() on BBB:
@@ -168,7 +166,6 @@ elif conf['hardware'] == 'beaglebone':
     pin26list = glob.glob("/sys/devices/ocp.*/P9_26_pinmux.*/state")
     for pin26 in pin26list:
         os.system("echo uart > %s" % (pin26))
-
 
     ### Set up atmega328 reset control
     # The reset pin is connected to GPIO2_7 (2*32+7 = 71).
@@ -261,6 +258,7 @@ elif conf['hardware'] == 'raspberrypi':
     if os.geteuid() == 0:
         conf['network_port'] = 80
     import RPi.GPIO as GPIO
+
     # GPIO.setwarnings(False) # surpress warnings
     GPIO.setmode(GPIO.BCM)  # use chip pin number
     pinSense = 7
@@ -281,16 +279,17 @@ elif conf['hardware'] == 'raspberrypi':
     # to be edited to deactivate the serial terminal login
     # (basically anything related to ttyAMA0)
 
-
 configpath = ''
+
+
 def load(configname):
     if configname:
-        path = os.path.join(conf['confdir'], 'config.'+configname+'.json')
+        path = os.path.join(conf['confdir'], 'config.' + configname + '.json')
     else:
         path = os.path.join(conf['confdir'], 'config.json')
     global configpath
     configpath = path
-    #load
+    # load
     if os.path.exists(path):
         # print "CONFIG: " + path
         # apply user config
@@ -307,7 +306,7 @@ def load(configname):
             # special case: default config not present, create
             print("INFO: creating default config file")
             with open(path, "w") as fp:
-                confout = {k:v for k,v in list(conf.items()) if k in userconfigurable}
+                confout = {k: v for k, v in list(conf.items()) if k in userconfigurable}
                 json.dump(confout, fp, indent=4)
         else:
             print("ERROR: invalid config specified")

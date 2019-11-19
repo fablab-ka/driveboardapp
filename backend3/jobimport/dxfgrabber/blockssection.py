@@ -28,7 +28,7 @@ class BlocksSection(object):
         if len(tags) == 3:  # empty block section
             return
         groups = list()
-        for group in TagGroups(islice(tags, 2, len(tags)-1)):
+        for group in TagGroups(islice(tags, 2, len(tags) - 1)):
             groups.append(group)
             if group[0].value == 'ENDBLK':
                 entities = build_entities(groups)

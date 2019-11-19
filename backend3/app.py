@@ -6,8 +6,7 @@ import argparse
 
 import config
 
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
-
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 ### Setup Argument Parser
 argparser = argparse.ArgumentParser(description='Run DriveboardApp.', prog='driveboardapp')
@@ -46,6 +45,7 @@ except ImportError:
 
 if not args.cli:
     import window
+
     root = window.init()
 
 print("DriveboardApp v" + config.conf['version'])

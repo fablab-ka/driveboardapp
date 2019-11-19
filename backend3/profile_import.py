@@ -9,8 +9,6 @@ import glob
 import lasersaur
 import jobimport
 
-
-
 ### Setup Argument Parser
 argparser = argparse.ArgumentParser(description='time/profile job import.', prog='profile_import.py')
 argparser.add_argument('jobfile', metavar='jobfile', nargs='?', default=None,
@@ -24,11 +22,10 @@ argparser.add_argument('-n', '--nooptimize', dest='nooptimize', action='store_tr
 argparser.add_argument('--tolerance', dest='tolerance',
                        default=0.08, help='tolerance in mm')
 argparser.add_argument('-p', '--profile', dest='profile', action='store_true',
-                    default=False, help='run with profiling')
+                       default=False, help='run with profiling')
 argparser.add_argument('-t', '--timeit', dest='timeit', action='store_true',
-                    default=False, help='run with timing')
+                       default=False, help='run with timing')
 args = argparser.parse_args()
-
 
 
 def main():
@@ -39,7 +36,7 @@ def main():
         with open(jobfile) as fp:
             job = fp.read()
         job = jobimport.convert(job, tolerance=float(args.tolerance),
-                                     optimize=not(args.nooptimize))
+                                optimize=not (args.nooptimize))
 
         # stats
         total_points = 0

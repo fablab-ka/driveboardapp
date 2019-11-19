@@ -35,4 +35,5 @@ def decode(text_lines):
             else:
                 s += chr(c ^ 0x5F)
         return ''.join(s)
+
     return [_decode(line) for line in text_lines]

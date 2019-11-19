@@ -43,7 +43,7 @@ class EntitySection(object):
     def _build(self, tags):
         if len(tags) == 3:  # empty entities section
             return
-        groups = TagGroups(islice(tags, 2, len(tags)-1))
+        groups = TagGroups(islice(tags, 2, len(tags) - 1))
         self._entities = build_entities(groups)
 
 

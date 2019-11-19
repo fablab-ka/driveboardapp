@@ -17,7 +17,6 @@ SPECIAL_CHARS = {
     'd': '°'
 }
 
-
 basic_attribs = {
     5: 'handle',
     6: 'linetype',
@@ -135,6 +134,7 @@ class Arc(Circle):
             else:
                 yield code, value  # chain of generators
         self.set_default_extrusion()
+
 
 TRACE_CODES = frozenset((10, 11, 12, 13))
 
@@ -461,7 +461,7 @@ class SubFace(object):
         return abs(self.face_record.vtx[pos]) - 1
 
     def indices(self):
-        return tuple(abs(i)-1 for i in self.face_record.vtx if i != 0)
+        return tuple(abs(i) - 1 for i in self.face_record.vtx if i != 0)
 
     def is_edge_visible(self, pos):
         return self.face_record.vtx[pos] > 0
@@ -732,8 +732,9 @@ def deg2vec(deg):
 
 def normalized(vector):
     x, y, z = vector
-    m = (x**2 + y**2 + z**2)**0.5
-    return x/m, y/m, z/m
+    m = (x ** 2 + y ** 2 + z ** 2) ** 0.5
+    return x / m, y / m, z / m
+
 
 ##################################################
 # MTEXT inline codes
@@ -1120,7 +1121,7 @@ class Spline(DXFEntity):
         subclass = 'AcDbSpline'
         for code, value in super(Spline, self).setup_attributes(tags):
             if subclass == 'AcDbHelix':
-                yield code, value # chain of generators
+                yield code, value  # chain of generators
             elif code == 10:
                 self.control_points.append(value)
             elif code == 11:
@@ -1259,4 +1260,3 @@ def entity_factory(tags):
     entity = cls()  # call constructor
     list(entity.setup_attributes(tags))  # setup dxf attributes - chain of generators
     return entity
-

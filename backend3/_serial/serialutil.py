@@ -14,18 +14,25 @@ except (NameError, AttributeError):
     # should behave like str. For Python older than 3.0 we want to work with
     # strings anyway, only later versions have a true bytes type.
     bytes = str
+
+
     # bytearray is a mutable type that is easily turned into an instance of
     # bytes
     class bytearray(list):
         # for bytes(bytearray()) usage
-        def __str__(self): return ''.join(self)
-        def __repr__(self): return 'bytearray(%r)' % ''.join(self)
+        def __str__(self):
+            return ''.join(self)
+
+        def __repr__(self):
+            return 'bytearray(%r)' % ''.join(self)
+
         # append automatically converts integers to characters
         def append(self, item):
             if isinstance(item, str):
                 list.append(self, item)
             else:
                 list.append(self, chr(item))
+
         # +=
         def __iadd__(self, other):
             for byte in other:
@@ -76,23 +83,23 @@ def to_bytes(seq):
             b.append(item)  # this one handles int and str for our emulation and ints for Python 3.x
         return bytes(b)
 
+
 # create control bytes
-XON  = to_bytes([17])
+XON = to_bytes([17])
 XOFF = to_bytes([19])
 
 CR = to_bytes([13])
 LF = to_bytes([10])
-
 
 PARITY_NONE, PARITY_EVEN, PARITY_ODD, PARITY_MARK, PARITY_SPACE = 'N', 'E', 'O', 'M', 'S'
 STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO = (1, 1.5, 2)
 FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS = (5, 6, 7, 8)
 
 PARITY_NAMES = {
-    PARITY_NONE:  'None',
-    PARITY_EVEN:  'Even',
-    PARITY_ODD:   'Odd',
-    PARITY_MARK:  'Mark',
+    PARITY_NONE: 'None',
+    PARITY_EVEN: 'Even',
+    PARITY_ODD: 'Odd',
+    PARITY_MARK: 'Mark',
     PARITY_SPACE: 'Space',
 }
 
@@ -192,7 +199,7 @@ class FileLike(object):
             line = self.readline(eol=eol)
             if line:
                 lines.append(line)
-                if line[-leneol:] != eol:    # was the line received with a timeout?
+                if line[-leneol:] != eol:  # was the line received with a timeout?
                     break
             else:
                 break
@@ -210,7 +217,7 @@ class FileLike(object):
 
     # other functions of file-likes - not used by pySerial
 
-    #~ readinto(b)
+    # ~ readinto(b)
 
     def seek(self, pos, whence=0):
         raise IOError("file is not seekable")
@@ -237,24 +244,24 @@ class SerialBase(object):
                  576000, 921600, 1000000, 1152000, 1500000, 2000000, 2500000,
                  3000000, 3500000, 4000000)
     BYTESIZES = (FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS)
-    PARITIES  = (PARITY_NONE, PARITY_EVEN, PARITY_ODD, PARITY_MARK, PARITY_SPACE)
-    STOPBITS  = (STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO)
+    PARITIES = (PARITY_NONE, PARITY_EVEN, PARITY_ODD, PARITY_MARK, PARITY_SPACE)
+    STOPBITS = (STOPBITS_ONE, STOPBITS_ONE_POINT_FIVE, STOPBITS_TWO)
 
     def __init__(self,
-                 port = None,           # number of device, numbering starts at
-                                        # zero. if everything fails, the user
-                                        # can specify a device string, note
-                                        # that this isn't portable anymore
-                                        # port will be opened if one is specified
-                 baudrate=9600,         # baud rate
-                 bytesize=EIGHTBITS,    # number of data bits
-                 parity=PARITY_NONE,    # enable parity checking
-                 stopbits=STOPBITS_ONE, # number of stop bits
-                 timeout=None,          # set a timeout value, None to wait forever
-                 xonxoff=False,         # enable software flow control
-                 rtscts=False,          # enable RTS/CTS flow control
-                 writeTimeout=None,     # set a timeout for writes
-                 dsrdtr=False,          # None: use rtscts setting, dsrdtr override if True or False
+                 port=None,  # number of device, numbering starts at
+                 # zero. if everything fails, the user
+                 # can specify a device string, note
+                 # that this isn't portable anymore
+                 # port will be opened if one is specified
+                 baudrate=9600,  # baud rate
+                 bytesize=EIGHTBITS,  # number of data bits
+                 parity=PARITY_NONE,  # enable parity checking
+                 stopbits=STOPBITS_ONE,  # number of stop bits
+                 timeout=None,  # set a timeout value, None to wait forever
+                 xonxoff=False,  # enable software flow control
+                 rtscts=False,  # enable RTS/CTS flow control
+                 writeTimeout=None,  # set a timeout for writes
+                 dsrdtr=False,  # None: use rtscts setting, dsrdtr override if True or False
                  interCharTimeout=None  # Inter-character timeout, None to disable
                  ):
         """\
@@ -263,30 +270,30 @@ class SerialBase(object):
         is returned.
         """
 
-        self._isOpen   = False
-        self._port     = None           # correct value is assigned below through properties
-        self._baudrate = None           # correct value is assigned below through properties
-        self._bytesize = None           # correct value is assigned below through properties
-        self._parity   = None           # correct value is assigned below through properties
-        self._stopbits = None           # correct value is assigned below through properties
-        self._timeout  = None           # correct value is assigned below through properties
-        self._writeTimeout = None       # correct value is assigned below through properties
-        self._xonxoff  = None           # correct value is assigned below through properties
-        self._rtscts   = None           # correct value is assigned below through properties
-        self._dsrdtr   = None           # correct value is assigned below through properties
-        self._interCharTimeout = None   # correct value is assigned below through properties
+        self._isOpen = False
+        self._port = None  # correct value is assigned below through properties
+        self._baudrate = None  # correct value is assigned below through properties
+        self._bytesize = None  # correct value is assigned below through properties
+        self._parity = None  # correct value is assigned below through properties
+        self._stopbits = None  # correct value is assigned below through properties
+        self._timeout = None  # correct value is assigned below through properties
+        self._writeTimeout = None  # correct value is assigned below through properties
+        self._xonxoff = None  # correct value is assigned below through properties
+        self._rtscts = None  # correct value is assigned below through properties
+        self._dsrdtr = None  # correct value is assigned below through properties
+        self._interCharTimeout = None  # correct value is assigned below through properties
 
         # assign values using get/set methods using the properties feature
-        self.port     = port
+        self.port = port
         self.baudrate = baudrate
         self.bytesize = bytesize
-        self.parity   = parity
+        self.parity = parity
         self.stopbits = stopbits
-        self.timeout  = timeout
+        self.timeout = timeout
         self.writeTimeout = writeTimeout
-        self.xonxoff  = xonxoff
-        self.rtscts   = rtscts
-        self.dsrdtr   = dsrdtr
+        self.xonxoff = xonxoff
+        self.rtscts = rtscts
+        self.dsrdtr = dsrdtr
         self.interCharTimeout = interCharTimeout
 
         if port is not None:
@@ -344,7 +351,6 @@ class SerialBase(object):
 
     port = property(getPort, setPort, doc="Port setting")
 
-
     def setBaudrate(self, baudrate):
         """\
         Change baud rate. It raises a ValueError if the port is open and the
@@ -367,7 +373,6 @@ class SerialBase(object):
 
     baudrate = property(getBaudrate, setBaudrate, doc="Baud rate setting")
 
-
     def setByteSize(self, bytesize):
         """Change byte size."""
         if bytesize not in self.BYTESIZES: raise ValueError("Not a valid byte size: %r" % (bytesize,))
@@ -379,7 +384,6 @@ class SerialBase(object):
         return self._bytesize
 
     bytesize = property(getByteSize, setByteSize, doc="Byte size setting")
-
 
     def setParity(self, parity):
         """Change parity setting."""
@@ -393,7 +397,6 @@ class SerialBase(object):
 
     parity = property(getParity, setParity, doc="Parity setting")
 
-
     def setStopbits(self, stopbits):
         """Change stop bits size."""
         if stopbits not in self.STOPBITS: raise ValueError("Not a valid stop bit size: %r" % (stopbits,))
@@ -406,12 +409,11 @@ class SerialBase(object):
 
     stopbits = property(getStopbits, setStopbits, doc="Stop bits setting")
 
-
     def setTimeout(self, timeout):
         """Change timeout setting."""
         if timeout is not None:
             try:
-                timeout + 1     # test if it's a number, will throw a TypeError if not...
+                timeout + 1  # test if it's a number, will throw a TypeError if not...
             except TypeError:
                 raise ValueError("Not a valid timeout: %r" % (timeout,))
             if timeout < 0: raise ValueError("Not a valid timeout: %r" % (timeout,))
@@ -424,13 +426,12 @@ class SerialBase(object):
 
     timeout = property(getTimeout, setTimeout, doc="Timeout setting for read()")
 
-
     def setWriteTimeout(self, timeout):
         """Change timeout setting."""
         if timeout is not None:
             if timeout < 0: raise ValueError("Not a valid timeout: %r" % (timeout,))
             try:
-                timeout + 1     #test if it's a number, will throw a TypeError if not...
+                timeout + 1  # test if it's a number, will throw a TypeError if not...
             except TypeError:
                 raise ValueError("Not a valid timeout: %r" % timeout)
 
@@ -442,7 +443,6 @@ class SerialBase(object):
         return self._writeTimeout
 
     writeTimeout = property(getWriteTimeout, setWriteTimeout, doc="Timeout setting for write()")
-
 
     def setXonXoff(self, xonxoff):
         """Change XON/XOFF setting."""
@@ -487,7 +487,7 @@ class SerialBase(object):
         if interCharTimeout is not None:
             if interCharTimeout < 0: raise ValueError("Not a valid timeout: %r" % interCharTimeout)
             try:
-                interCharTimeout + 1     # test if it's a number, will throw a TypeError if not...
+                interCharTimeout + 1  # test if it's a number, will throw a TypeError if not...
             except TypeError:
                 raise ValueError("Not a valid timeout: %r" % interCharTimeout)
 
@@ -498,19 +498,20 @@ class SerialBase(object):
         """Get the current inter-character timeout setting."""
         return self._interCharTimeout
 
-    interCharTimeout = property(getInterCharTimeout, setInterCharTimeout, doc="Inter-character timeout setting for read()")
+    interCharTimeout = property(getInterCharTimeout, setInterCharTimeout,
+                                doc="Inter-character timeout setting for read()")
 
     #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
     _SETTINGS = ('baudrate', 'bytesize', 'parity', 'stopbits', 'xonxoff',
-            'dsrdtr', 'rtscts', 'timeout', 'writeTimeout', 'interCharTimeout')
+                 'dsrdtr', 'rtscts', 'timeout', 'writeTimeout', 'interCharTimeout')
 
     def getSettingsDict(self):
         """\
         Get current port settings as a dictionary. For use with
         applySettingsDict.
         """
-        return dict([(key, getattr(self, '_'+key)) for key in self._SETTINGS])
+        return dict([(key, getattr(self, '_' + key)) for key in self._SETTINGS])
 
     def applySettingsDict(self, d):
         """\
@@ -519,8 +520,8 @@ class SerialBase(object):
         values will simply left unchanged.
         """
         for key in self._SETTINGS:
-            if d[key] != getattr(self, '_'+key):   # check against internal "_" value
-                setattr(self, key, d[key])          # set non "_" value to use properties write function
+            if d[key] != getattr(self, '_' + key):  # check against internal "_" value
+                setattr(self, key, d[key])  # set non "_" value to use properties write function
 
     #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
 
@@ -541,13 +542,18 @@ class SerialBase(object):
             self.dsrdtr,
         )
 
-
     #  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
     # compatibility with io library
 
-    def readable(self): return True
-    def writable(self): return True
-    def seekable(self): return False
+    def readable(self):
+        return True
+
+    def writable(self):
+        return True
+
+    def seekable(self):
+        return False
+
     def readinto(self, b):
         data = self.read(len(b))
         n = len(data)
@@ -563,6 +569,7 @@ class SerialBase(object):
 
 if __name__ == '__main__':
     import sys
+
     s = SerialBase()
     sys.stdout.write('port name:  %s\n' % s.portstr)
     sys.stdout.write('baud rates: %s\n' % s.getSupportedBaudrates())

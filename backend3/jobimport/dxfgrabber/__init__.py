@@ -9,7 +9,6 @@ VERSION = "%d.%d.%d" % version
 __author__ = "mozman <mozman@gmx.at>"
 __doc__ = """A Python library to grab information from DXF drawings - all DXF versions supported."""
 
-
 # Python27/3x support should be done here
 import sys
 

@@ -198,10 +198,10 @@ def _reversedict(d):
     """
     return dict(list(zip(list(d.values()), list(d.keys()))))
 
+
 HEX_COLOR_RE = re.compile(r'^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6})$')
 
 SUPPORTED_SPECIFICATIONS = ('html4', 'css2', 'css21', 'css3')
-
 
 ######################################################################
 # Mappings of color names to normalized hexadecimal color values.
@@ -381,7 +381,6 @@ css3_names_to_hex = {
     'yellowgreen': '#9acd32',
 }
 
-
 ######################################################################
 # Mappings of normalized hexadecimal color values to color names.
 ######################################################################
@@ -499,14 +498,17 @@ def name_to_hex(name, spec='css3'):
     
     """
     if spec not in SUPPORTED_SPECIFICATIONS:
-        raise TypeError("'%s' is not a supported specification for color name lookups; supported specifications are: %s." % (spec,
-                                                                                                                             ', '.join(SUPPORTED_SPECIFICATIONS)))
+        raise TypeError(
+            "'%s' is not a supported specification for color name lookups; supported specifications are: %s." % (spec,
+                                                                                                                 ', '.join(
+                                                                                                                     SUPPORTED_SPECIFICATIONS)))
     normalized = name.lower()
     try:
         hex_value = globals()['%s_names_to_hex' % spec][normalized]
     except KeyError:
         raise ValueError("'%s' is not defined as a named color in %s." % (name, spec))
     return hex_value
+
 
 def name_to_rgb(name, spec='css3'):
     """
@@ -535,6 +537,7 @@ def name_to_rgb(name, spec='css3'):
     
     """
     return hex_to_rgb(name_to_hex(name, spec=spec))
+
 
 def name_to_rgb_percent(name, spec='css3'):
     """
@@ -567,7 +570,7 @@ def name_to_rgb_percent(name, spec='css3'):
 # Conversions from hexadecimal color values to various formats.
 ######################################################################
 
-    
+
 def hex_to_name(hex_value, spec='css3'):
     """
     Convert a hexadecimal color value to its corresponding normalized
@@ -605,14 +608,17 @@ def hex_to_name(hex_value, spec='css3'):
     
     """
     if spec not in SUPPORTED_SPECIFICATIONS:
-        raise TypeError("'%s' is not a supported specification for color name lookups; supported specifications are: %s." % (spec,
-                                                                                                                             ', '.join(SUPPORTED_SPECIFICATIONS)))
+        raise TypeError(
+            "'%s' is not a supported specification for color name lookups; supported specifications are: %s." % (spec,
+                                                                                                                 ', '.join(
+                                                                                                                     SUPPORTED_SPECIFICATIONS)))
     normalized = normalize_hex(hex_value)
     try:
         name = globals()['%s_hex_to_names' % spec][normalized]
     except KeyError:
         raise ValueError("'%s' has no defined color name in %s." % (hex_value, spec))
     return name
+
 
 def hex_to_rgb(hex_value):
     """
@@ -635,6 +641,7 @@ def hex_to_rgb(hex_value):
     """
     hex_digits = normalize_hex(hex_value)
     return tuple([int(s, 16) for s in (hex_digits[1:3], hex_digits[3:5], hex_digits[5:7])])
+
 
 def hex_to_rgb_percent(hex_value):
     """
@@ -684,6 +691,7 @@ def rgb_to_name(rgb_triplet, spec='css3'):
     """
     return hex_to_name(rgb_to_hex(rgb_triplet), spec=spec)
 
+
 def rgb_to_hex(rgb_triplet):
     """
     Convert a 3-tuple of integers, suitable for use in an ``rgb()``
@@ -700,6 +708,7 @@ def rgb_to_hex(rgb_triplet):
     
     """
     return '#%02x%02x%02x' % rgb_triplet
+
 
 def rgb_to_rgb_percent(rgb_triplet):
     """
@@ -730,8 +739,8 @@ def rgb_to_rgb_percent(rgb_triplet):
     # In order to maintain precision for common values,
     # 256 / 2**n is special-cased for values of n
     # from 0 through 4, as well as 0 itself.
-    specials = { 255: '100%', 128: '50%', 64: '25%',
-                 32: '12.5%', 16: '6.25%', 0: '0%' }
+    specials = {255: '100%', 128: '50%', 64: '25%',
+                32: '12.5%', 16: '6.25%', 0: '0%'}
     return tuple([specials.get(d, '%.02f%%' % ((d / 255.0) * 100)) for d in rgb_triplet])
 
 
@@ -765,6 +774,7 @@ def rgb_percent_to_name(rgb_percent_triplet, spec='css3'):
     """
     return rgb_to_name(rgb_percent_to_rgb(rgb_percent_triplet), spec=spec)
 
+
 def rgb_percent_to_hex(rgb_percent_triplet):
     """
     Convert a 3-tuple of percentages, suitable for use in an ``rgb()``
@@ -783,6 +793,7 @@ def rgb_percent_to_hex(rgb_percent_triplet):
     """
     return rgb_to_hex(rgb_percent_to_rgb(rgb_percent_triplet))
 
+
 def _percent_to_integer(percent):
     """
     Internal helper for converting a percentage value to an integer
@@ -792,6 +803,7 @@ def _percent_to_integer(percent):
     num = float(percent.split('%')[0]) / 100.0 * 255
     e = num - math.floor(num)
     return e < 0.5 and int(math.floor(num)) or int(math.ceil(num))
+
 
 def rgb_percent_to_rgb(rgb_percent_triplet):
     """
@@ -823,4 +835,5 @@ def rgb_percent_to_rgb(rgb_percent_triplet):
 
 if __name__ == '__main__':
     import doctest
+
     doctest.testmod()

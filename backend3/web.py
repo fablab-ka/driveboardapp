@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 
 import sys
@@ -19,11 +18,10 @@ from config import conf, userconfigurable, write_config_fields, conf_defaults
 import driveboard
 import jobimport
 
-
-__author__  = 'Stefan Hechenberger <stefan@nortd.com>'
+__author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
 DEBUG = False
-bottle.BaseRequest.MEMFILE_MAX = 1024*1024*100 # max 100Mb files
+bottle.BaseRequest.MEMFILE_MAX = 1024 * 1024 * 100  # max 100Mb files
 time_status_last = 0
 
 if conf['mill_mode']:
@@ -37,13 +35,16 @@ def checkuser(user, pw):
     """Check login credentials, used by auth_basic decorator."""
     return bool(user in conf['users'] and conf['users'][user] == pw)
 
+
 def checkserial(func):
     """Decorator to call function only when machine connected."""
+
     def _decorator(*args, **kwargs):
-            if driveboard.connected():
-                return func(*args, **kwargs)
-            else:
-                bottle.abort(400, "No machine.")
+        if driveboard.connected():
+            return func(*args, **kwargs)
+        else:
+            bottle.abort(400, "No machine.")
+
     return _decorator
 
 
@@ -51,27 +52,33 @@ def checkserial(func):
 
 @bottle.route('/')
 def default_handler():
-    return bottle.static_file('app.html', root=os.path.join(conf['rootdir'], frontend_path) )
+    return bottle.static_file('app.html', root=os.path.join(conf['rootdir'], frontend_path))
+
 
 @bottle.route('/<file>')
 def static_bin_handler(file):
     return bottle.static_file(file, root=os.path.join(conf['rootdir'], frontend_path))
 
+
 @bottle.route('/css/<path:path>')
 def static_css_handler(path):
     return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'css'))
+
 
 @bottle.route('/fonts/<path:path>')
 def static_font_handler(path):
     return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'fonts'))
 
+
 @bottle.route('/js/<path:path>')
 def static_js_handler(path):
     return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'js'))
 
+
 @bottle.route('/img/<path:path>')
 def static_img_handler(path):
     return bottle.static_file(path, root=os.path.join(conf['rootdir'], frontend_path, 'img'))
+
 
 @bottle.route('/favicon.ico')
 def favicon_handler():
@@ -102,7 +109,6 @@ def download(filename, dlname):
     return bottle.static_file(filename, root=tempfile.gettempdir(), download=dlname)
 
 
-
 ### LOW-LEVEL
 
 @bottle.route('/config')
@@ -123,7 +129,7 @@ def config(key=None, value=None):
                 except ValueError:
                     pass
             conf[key] = value
-            write_config_fields({key:value})
+            write_config_fields({key: value})
             return "Written to config file."
         else:
             return "Not a user-configurable key."
@@ -136,18 +142,17 @@ def confserial(port=None):
     """Write serial port to configuration file."""
     if port:
         conf['serial_port'] = port
-        write_config_fields({'serial_port':port})
+        write_config_fields({'serial_port': port})
         return "Serial port written to config file."
     else:
         return conf['serial_port']
-
 
 
 @bottle.route('/status')
 @bottle.auth_basic(checkuser)
 def status():
     global time_status_last
-    if not driveboard.connected() and (time.time()-time_status_last) > 6.0:
+    if not driveboard.connected() and (time.time() - time_status_last) > 6.0:
         driveboard.connect_withfind(verbose=False)
     time_status_last = time.time()
     return json.dumps(driveboard.status())
@@ -160,12 +165,14 @@ def homing():
     driveboard.homing()
     return '{}'
 
+
 @bottle.route('/feedrate/<val:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def feedrate(val):
     driveboard.feedrate(val)
     return '{}'
+
 
 @bottle.route('/intensity/<val:float>')
 @bottle.auth_basic(checkuser)
@@ -174,12 +181,14 @@ def intensity(val):
     driveboard.intensity(val)
     return '{}'
 
+
 @bottle.route('/relative')
 @bottle.auth_basic(checkuser)
 @checkserial
 def relative():
     driveboard.relative()
     return '{}'
+
 
 @bottle.route('/absolute')
 @bottle.auth_basic(checkuser)
@@ -198,6 +207,7 @@ def retract():
     driveboard.supermove(z=0)
     driveboard.supermove(x=0, y=0)
     return '{}'
+
 
 @bottle.route('/jog/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
@@ -218,6 +228,7 @@ def move(x, y, z):
     driveboard.move(x, y, z)
     return '{}'
 
+
 @bottle.route('/movex/<x:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -225,12 +236,14 @@ def movex(x):
     driveboard.move(x=x)
     return '{}'
 
+
 @bottle.route('/movey/<y:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def movey(y):
     driveboard.move(y=y)
     return '{}'
+
 
 @bottle.route('/movez/<z:float>')
 @bottle.auth_basic(checkuser)
@@ -247,6 +260,7 @@ def supermove(x, y, z):
     driveboard.supermove(x, y, z)
     return '{}'
 
+
 @bottle.route('/supermovex/<x:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -254,12 +268,14 @@ def supermovex(x):
     driveboard.supermove(x=x)
     return '{}'
 
+
 @bottle.route('/supermovey/<y:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
 def supermovey(y):
     driveboard.supermove(y=y)
     return '{}'
+
 
 @bottle.route('/supermovez/<z:float>')
 @bottle.auth_basic(checkuser)
@@ -276,12 +292,14 @@ def air_on():
     driveboard.air_on()
     return '{}'
 
+
 @bottle.route('/air_off')
 @bottle.auth_basic(checkuser)
 @checkserial
 def air_off():
     driveboard.air_off()
     return '{}'
+
 
 @bottle.route('/aux_on')
 @bottle.auth_basic(checkuser)
@@ -290,12 +308,14 @@ def aux_on():
     driveboard.aux_on()
     return '{}'
 
+
 @bottle.route('/aux_off')
 @bottle.auth_basic(checkuser)
 @checkserial
 def aux_off():
     driveboard.aux_off()
     return '{}'
+
 
 @bottle.route('/offset/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
@@ -305,6 +325,8 @@ def offset(x, y, z):
         bottle.abort(400, "Machine not ready.")
     driveboard.offset(x, y, z)
     return '{}'
+
+
 @bottle.route('/offsetx/<x:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -313,6 +335,8 @@ def offset(x):
         bottle.abort(400, "Machine not ready.")
     driveboard.offset(x=x)
     return '{}'
+
+
 @bottle.route('/offsety/<y:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -321,6 +345,8 @@ def offsety(y):
         bottle.abort(400, "Machine not ready.")
     driveboard.offset(y=y)
     return '{}'
+
+
 @bottle.route('/offsetz/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -330,6 +356,7 @@ def offsetz(z):
     driveboard.offset(z=z)
     return '{}'
 
+
 @bottle.route('/absoffset/<x:float>/<y:float>/<z:float>')
 @bottle.auth_basic(checkuser)
 @checkserial
@@ -338,8 +365,6 @@ def offset(x, y, z):
         bottle.abort(400, "Machine not ready.")
     driveboard.absoffset(x, y, z)
     return '{}'
-
-
 
 
 ### JOBS QUEUE
@@ -366,14 +391,15 @@ def _get_sorted(globpattern, library=False, stripext=False):
         os.chdir(cwd_temp)
     return files
 
+
 def _get(jobname, library=False):
     # get job as sting
     if library:
         jobpath = os.path.join(conf['rootdir'], 'library', jobname.strip('/\\'))
     else:
         jobpath = os.path.join(conf['confdir'], jobname.strip('/\\'))
-    if os.path.exists(jobpath+'.dba'):
-        jobpath = jobpath+'.dba'
+    if os.path.exists(jobpath + '.dba'):
+        jobpath = jobpath + '.dba'
     elif os.path.exists(jobpath + '.dba.starred'):
         jobpath = jobpath + '.dba.starred'
     else:
@@ -382,22 +408,25 @@ def _get(jobname, library=False):
         job = fp.read()
     return job
 
+
 def _get_path(jobname, library=False):
     if library:
         jobpath = os.path.join(conf['rootdir'], 'library', jobname.strip('/\\'))
     else:
         jobpath = os.path.join(conf['confdir'], jobname.strip('/\\'))
-    if os.path.exists(jobpath+'.dba'):
-        return jobpath+'.dba'
-    elif os.path.exists(jobpath+'.dba.starred'):
-        return jobpath+'.dba.starred'
+    if os.path.exists(jobpath + '.dba'):
+        return jobpath + '.dba'
+    elif os.path.exists(jobpath + '.dba.starred'):
+        return jobpath + '.dba.starred'
     else:
         bottle.abort(400, "No such file.")
 
+
 def _exists(jobname):
     namepath = os.path.join(conf['confdir'], jobname.strip('/\\'))
-    if os.path.exists(namepath+'.dba') or os.path.exists(namepath+'.dba.starred'):
+    if os.path.exists(namepath + '.dba') or os.path.exists(namepath + '.dba.starred'):
         bottle.abort(400, "File name exists.")
+
 
 def _clear(limit=None):
     files = _get_sorted('*.dba')
@@ -412,10 +441,11 @@ def _clear(limit=None):
         if type(limit) is int:
             limit -= 1
 
+
 def _add(job, name):
     # add job (dba string)
     # overwrites file if already exists, use _unique_name(name) to avoid
-    namepath = os.path.join(conf['confdir'], name.strip('/\\')+'.dba')
+    namepath = os.path.join(conf['confdir'], name.strip('/\\') + '.dba')
     with open(namepath, 'w') as fp:
         fp.write(job)
         print("file saved: " + namepath)
@@ -423,10 +453,11 @@ def _add(job, name):
     num_to_del = len(_get_sorted('*.dba')) - conf['max_jobs_in_list']
     _clear(num_to_del)
 
+
 def _unique_name(jobname):
     files = _get_sorted('*.dba*', stripext=True)
     if jobname in files:
-        for i in range(2,999):
+        for i in range(2, 999):
             altname = "%s_%s" % (jobname, i)
             if altname in files:
                 continue
@@ -434,7 +465,6 @@ def _unique_name(jobname):
                 jobname = altname
                 break
     return jobname
-
 
 
 @bottle.route('/load', method='POST')
@@ -480,7 +510,6 @@ def load():
         name = _unique_name(name)
     _add(json.dumps(job), name)
     return json.dumps(name)
-
 
 
 @bottle.route('/listing')
@@ -550,7 +579,6 @@ def clear():
     return '{}'
 
 
-
 ### LIBRARY
 
 @bottle.route('/listing_library')
@@ -577,7 +605,6 @@ def load_library(jobname):
     jobname = _unique_name(jobname)
     _add(job, jobname)
     return json.dumps(jobname)
-
 
 
 ### JOB EXECUTION
@@ -648,8 +675,6 @@ def unstop():
     return '{}'
 
 
-
-
 ### MCU MANAGMENT
 
 @bottle.route('/build')
@@ -693,6 +718,7 @@ def reset():
 def hello(name):
     return bottle.template('<b>Hello {{name}}</b>!', name=name)
 
+
 ###############################################################################
 ###############################################################################
 
@@ -721,6 +747,7 @@ class Server(threading.Thread):
             self.stop_server = True
         self.join()
 
+
 S = Server()
 
 
@@ -733,8 +760,9 @@ def start(browser=False, debug=False):
     DEBUG = debug
 
     class FixedHandler(wsgiref.simple_server.WSGIRequestHandler):
-        def address_string(self): # Prevent reverse DNS lookups please.
+        def address_string(self):  # Prevent reverse DNS lookups please.
             return self.client_address[0]
+
         def log_request(*args, **kw):
             if debug:
                 return wsgiref.simple_server.WSGIRequestHandler.log_request(*args, **kw)
@@ -759,14 +787,13 @@ def start(browser=False, debug=False):
     # open web-browser
     if browser:
         try:
-            webbrowser.open_new_tab('http://127.0.0.1:'+str(conf['network_port']))
+            webbrowser.open_new_tab('http://127.0.0.1:' + str(conf['network_port']))
         except webbrowser.Error:
             print("Cannot open Webbrowser, please do so manually.")
     sys.stdout.flush()  # make sure everything gets flushed
     # start server
     # print "INFO: Starting web server thread."
     S.start()
-
 
 
 def stop():
@@ -776,7 +803,6 @@ def stop():
     # and allow restarting
     del S
     S = Server()
-
 
 
 if __name__ == "__main__":

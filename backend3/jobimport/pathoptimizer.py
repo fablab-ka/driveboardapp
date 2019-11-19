@@ -13,14 +13,12 @@ It takes a list of paths and optimizes in-place.
 
 __author__ = 'Stefan Hechenberger <stefan@nortd.com>'
 
-
 import math
 import logging
 
 from . import kdtree
 
 log = logging.getLogger("svg_reader")
-
 
 
 def connect_segments(path, epsilon2):
@@ -32,14 +30,14 @@ def connect_segments(path, epsilon2):
     """
     join_count = 0
     newIdx = 0
-    for i in range(1,len(path)):
+    for i in range(1, len(path)):
         lastpathseg = path[newIdx]
         pathseg = path[i]
         point = lastpathseg[-1]
         startpoint = pathseg[0]
 
         # join into lastpathseg
-        d2_start = (point[0]-startpoint[0])**2 + (point[1]-startpoint[1])**2
+        d2_start = (point[0] - startpoint[0]) ** 2 + (point[1] - startpoint[1]) ** 2
         if d2_start < epsilon2:
             lastpathseg.extend(pathseg[1:])
             join_count += 1
@@ -49,7 +47,7 @@ def connect_segments(path, epsilon2):
             path[newIdx] = pathseg
 
     # remove exessive slots
-    for i in range(len(path)-(newIdx+1)):
+    for i in range(len(path) - (newIdx + 1)):
         path.pop()
 
     # report if excessive joins
@@ -57,8 +55,7 @@ def connect_segments(path, epsilon2):
         log.info("joined many path segments: " + str(join_count))
 
 
-
-def d2(u,v): return (u[0]-v[0])**2 + (u[1]-v[1])**2
+def d2(u, v): return (u[0] - v[0]) ** 2 + (u[1] - v[1]) ** 2
 
 
 def simplifyDP(tol2, v, j, k, mk):
@@ -66,37 +63,37 @@ def simplifyDP(tol2, v, j, k, mk):
     #  It just marks vertices that are part of the simplified polyline
     #  for approximating the polyline subchain v[j] to v[k].
     #  mk[] ... array of markers matching vertex array v[]
-    if k <= j+1:  # there is nothing to simplify
+    if k <= j + 1:  # there is nothing to simplify
         return
     # check for adequate approximation by segment S from v[j] to v[k]
-    maxi = j           # index of vertex farthest from S
-    maxd2 = 0          # distance squared of farthest vertex
-    S = [v[j], v[k]]   # segment from v[j] to v[k]
+    maxi = j  # index of vertex farthest from S
+    maxd2 = 0  # distance squared of farthest vertex
+    S = [v[j], v[k]]  # segment from v[j] to v[k]
     # u = diff(S[1], S[0])    # segment direction vector
-    u = [S[1][0]-S[0][0], S[1][1]-S[0][1]]  # segment direction vector
+    u = [S[1][0] - S[0][0], S[1][1] - S[0][1]]  # segment direction vector
     # cu = norm2(u)      # segment length squared
-    cu = u[0]**2 + u[1]**2  # segment length squared
+    cu = u[0] ** 2 + u[1] ** 2  # segment length squared
     # test each vertex v[i] for max distance from S
     # compute using the Feb 2001 Algorithm's dist_Point_to_Segment()
     # Note: this works in any dimension (2D, 3D, ...)
-    w = None           # vector
-    Pb = None          # point, base of perpendicular from v[i] to S
+    w = None  # vector
+    Pb = None  # point, base of perpendicular from v[i] to S
     b = 0.0
     cw = 0.0
-    dv2 = 0.0         # dv2 = distance v[i] to S squared
-    for i in range(j+1, k):
+    dv2 = 0.0  # dv2 = distance v[i] to S squared
+    for i in range(j + 1, k):
         # compute distance squared
         # w = diff(v[i], S[0])
-        w = [v[i][0]-S[0][0], v[i][1]-S[0][1]]  # diff
+        w = [v[i][0] - S[0][0], v[i][1] - S[0][1]]  # diff
         # cw = dot(w,u)
-        cw = w[0]*u[0] + w[1]*u[1]  # dot product
+        cw = w[0] * u[0] + w[1] * u[1]  # dot product
         if cw <= 0:
             dv2 = d2(v[i], S[0])
         elif cu <= cw:
             dv2 = d2(v[i], S[1])
         else:
             b = cw / cu
-            Pb = [S[0][0]+b*u[0], S[0][1]+b*u[1]]
+            Pb = [S[0][0] + b * u[0], S[0][1] + b * u[1]]
             dv2 = d2(v[i], Pb)
         # test with current max distance squared
         if dv2 <= maxd2:
@@ -104,9 +101,9 @@ def simplifyDP(tol2, v, j, k, mk):
         # v[i] is a new max vertex
         maxi = i
         maxd2 = dv2
-    if maxd2 > tol2:       # error is worse than the tolerance
+    if maxd2 > tol2:  # error is worse than the tolerance
         # split the polyline at the farthest vertex from S
-        mk[maxi] = 1       # mark v[maxi] for the simplified polyline
+        mk[maxi] = 1  # mark v[maxi] for the simplified polyline
         # recursively simplify the two subpolylines at v[maxi]
         simplifyDP(tol2, v, j, maxi, mk)  # polyline v[j] to v[maxi]
         simplifyDP(tol2, v, maxi, k, mk)  # polyline v[maxi] to v[k]
@@ -134,10 +131,10 @@ def simplify(pathseg, tolerance2):
     if n == 0:
         return []
     sPathseg = []
-    tPathseg = []                   # vertex buffer, points
+    tPathseg = []  # vertex buffer, points
 
     # STAGE 1.  Vertex Reduction within tolerance of prior vertex cluster
-    tPathseg.append(pathseg[0])        # start at the beginning
+    tPathseg.append(pathseg[0])  # start at the beginning
     k = 1
     pv = 0
     for i in range(1, n):
@@ -146,21 +143,20 @@ def simplify(pathseg, tolerance2):
         tPathseg.append(pathseg[i])
         k += 1
         pv = i
-    if pv < n-1:
-        tPathseg.append(pathseg[n-1])  # finish at the end
+    if pv < n - 1:
+        tPathseg.append(pathseg[n - 1])  # finish at the end
         k += 1
 
     # STAGE 2.  Douglas-Peucker polyline simplification
-    mk = [None for i in range(k)]    # marker buffer, ints
-    mk[0] = mk[k-1] = 1;              # mark the first and last vertices
-    simplifyDP(tolerance2, tPathseg, 0, k-1, mk)
+    mk = [None for i in range(k)]  # marker buffer, ints
+    mk[0] = mk[k - 1] = 1;  # mark the first and last vertices
+    simplifyDP(tolerance2, tPathseg, 0, k - 1, mk)
 
     # copy marked vertices to the output simplified polyline
     for i in range(k):
         if mk[i]:
             sPathseg.append(tPathseg[i])
     return sPathseg
-
 
 
 def simplify_all(path, tolerance2):
@@ -173,10 +169,9 @@ def simplify_all(path, tolerance2):
     if totalverts > 0:
         # report polyline optimizations
         difflength = totalverts - optiverts
-        diffpct = (100*difflength/totalverts)
+        diffpct = (100 * difflength / totalverts)
         if diffpct > 10:  # if diff more than 10%
             log.info("INFO: polylines optimized by " + str(int(diffpct)) + '%')
-
 
 
 def sort_by_seektime(path, start=[0.0, 0.0]):
@@ -187,14 +182,14 @@ def sort_by_seektime(path, start=[0.0, 0.0]):
         # copy, so we can place the result in path
         path_unsorted.append(pathseg)
         # populate kdtree
-        tree.insert(pathseg[0], (i,False))  # startpoint, data
-        tree.insert(pathseg[-1], (i,True))  # endpoint, data
+        tree.insert(pathseg[0], (i, False))  # startpoint, data
+        tree.insert(pathseg[-1], (i, True))  # endpoint, data
 
     # sort by proximity, greedy
     endpoint = start
     newIdx = 0
     usedIdxs = {}
-    for p in range(2*len(path_unsorted)):
+    for p in range(2 * len(path_unsorted)):
         node, distsq = tree.nearest(endpoint, checkempty=True)
         i, rev = node.data
         node.data = None
@@ -208,8 +203,8 @@ def sort_by_seektime(path, start=[0.0, 0.0]):
 
 
 def dxf_optimize(paths, tolerance):
-    tolerance2 = tolerance**2
-    epsilon2 = (0.1*tolerance)**2
+    tolerance2 = tolerance ** 2
+    epsilon2 = (0.1 * tolerance) ** 2
     for path in paths:
         # print "PATH before optimize: %s" % len(path)
         connect_segments(path, epsilon2)
@@ -217,9 +212,10 @@ def dxf_optimize(paths, tolerance):
         sort_by_seektime(path)
         # print "PATH after optimize: %s" % len(path)
 
+
 def optimize(path, tolerance):
-    tolerance2 = tolerance**2
-    epsilon2 = (0.1*tolerance)**2
+    tolerance2 = tolerance ** 2
+    epsilon2 = (0.1 * tolerance) ** 2
     connect_segments(path, epsilon2)
     simplify_all(path, tolerance2)
     sort_by_seektime(path)

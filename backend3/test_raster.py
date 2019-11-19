@@ -11,7 +11,6 @@ import web
 import lasersaur
 from config import conf
 
-
 # assertEqual(a, b)
 # assertNotEqual(a, b)
 # assertTrue(x)
@@ -43,9 +42,9 @@ def setUpModule():
     time.sleep(0.5)
     lasersaur.local()
 
+
 def tearDownModule():
     web.stop()
-
 
 
 class TestOpenRaster(unittest.TestCase):
@@ -54,13 +53,13 @@ class TestOpenRaster(unittest.TestCase):
         # img_g = img.convert('LA')  # to grayscale
         img_g = img.convert('L')  # to grayscale
         w = 80
-        h = int(img_g.size[1]*(float(w)/img_g.size[0]))
-        img_s = img_g.resize((w,h), resample=Image.BICUBIC)
+        h = int(img_g.size[1] * (float(w) / img_g.size[0]))
+        img_s = img_g.resize((w, h), resample=Image.BICUBIC)
         # img_s.show()
         data = img_s.getdata()
         for lx in range(h):
             for rx in range(w):
-                x = data[w*lx+rx]
+                x = data[w * lx + rx]
                 if x < 100:
                     sys.stdout.write('.')
                 elif x < 150:
@@ -72,11 +71,10 @@ class TestOpenRaster(unittest.TestCase):
             sys.stdout.write('\n')
 
 
-
 class TestRaster(unittest.TestCase):
 
     def testLoad(self):
-        jobfile = os.path.join(thislocation,'testjobs','raster_bat.svg')
+        jobfile = os.path.join(thislocation, 'testjobs', 'raster_bat.svg')
         job = lasersaur.open_file(jobfile)
         # if 'vector' in job:
         #     job['vector']['passes'] = [{
@@ -86,10 +84,10 @@ class TestRaster(unittest.TestCase):
         #         }]
         if 'raster' in job:
             job['raster']['passes'] = [{
-                    "images":[0],
-                    "feedrate":4000,
-                    "intensity":53
-                }]
+                "images": [0],
+                "feedrate": 4000,
+                "intensity": 53
+            }]
         print(list(job.keys()))
         pprint.pprint(job['raster']['passes'])
         jobname = lasersaur.load(job)

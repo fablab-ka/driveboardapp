@@ -28,7 +28,7 @@ class AcDsDataSection(object):
         if len(tags) == 3:  # empty entities section
             return
 
-        for group in TagGroups(islice(tags, 2, len(tags)-1)):
+        for group in TagGroups(islice(tags, 2, len(tags) - 1)):
             data_record = AcDsDataRecord(Tags(group))
             if data_record.dxftype == 'ACDSRECORD':
                 asm_data = data_record.get_section('ASM_Data', None)
